@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F1 Fantasy League 2026</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+const { useState } = React;
+
+function App() {
+  const drivers2026 = [
+    { position: '1', Driver: { driverId: '4', givenName: 'Lando', familyName: 'Norris' }, Constructors: [{ name: 'McLaren' }] },
+    { position: '2', Driver: { driverId: '81', givenName: 'Oscar', familyName: 'Piastri' }, Constructors: [{ name: 'McLaren' }] },
+    { position: '3', Driver: { driverId: '16', givenName: 'Charles', familyName: 'Leclerc' }, Constructors: [{ name: 'Ferrari' }] },
+    { position: '4', Driver: { driverId: '44', givenName: 'Lewis', familyName: 'Hamilton' }, Constructors: [{ name: 'Ferrari' }] },
+    { position: '5', Driver: { driverId: '1', givenName: 'Max', familyName: 'Verstappen' }, Constructors: [{ name: 'Red Bull' }] },
+    { position: '6', Driver: { driverId: '6', givenName: 'Isack', familyName: 'Hadjar' }, Constructors: [{ name: 'Red Bull' }] },
+    { position: '7', Driver: { driverId: '63', givenName: 'George', familyName: 'Russell' }, Constructors: [{ name: 'Mercedes' }] },
+    { position: '8', Driver: { driverId: '12', givenName: 'Kimi', familyName: 'Antonelli' }, Constructors: [{ name: 'Mercedes' }] },
+    { position: '9', Driver: { driverId: '14', givenName: 'Fernando', familyName: 'Alonso' }, Constructors: [{ name: 'Aston Martin' }] },
+    { position: '10', Driver: { driverId: '18', givenName: 'Lance', familyName: 'Stroll' }, Constructors: [{ name: 'Aston Martin' }] },
+    { position: '11', Driver: { driverId: '10', givenName: 'Pierre', familyName: 'Gasly' }, Constructors: [{ name: 'Alpine' }] },
+    { position: '12', Driver: { driverId: '43', givenName: 'Franco', familyName: 'Colapinto' }, Constructors: [{ name: 'Alpine' }] },
+    { position: '13', Driver: { driverId: '23', givenName: 'Alexander', familyName: 'Albon' }, Constructors: [{ name: 'Williams' }] },
+    { position: '14', Driver: { driverId: '55', givenName: 'Carlos', familyName: 'Sainz' }, Constructors: [{ name: 'Williams' }] },
+    { position: '15', Driver: { driverId: '87', givenName: 'Oliver', familyName: 'Bearman' }, Constructors: [{ name: 'Haas' }] },
+    { position: '16', Driver: { driverId: '31', givenName: 'Esteban', familyName: 'Ocon' }, Constructors: [{ name: 'Haas' }] },
+    { position: '17', Driver: { driverId: '30', givenName: 'Liam', familyName: 'Lawson' }, Constructors: [{ name: 'Racing Bulls' }] },
+    { position: '18', Driver: { driverId: '45', givenName: 'Arvid', familyName: 'Lindblad' }, Constructors: [{ name: 'Racing Bulls' }] },
+    { position: '19', Driver: { driverId: '27', givenName: 'Nico', familyName: 'Hulkenberg' }, Constructors: [{ name: 'Audi' }] },
+    { position: '20', Driver: { driverId: '38', givenName: 'Gabriel', familyName: 'Bortoleto' }, Constructors: [{ name: 'Audi' }] },
+    { position: '21', Driver: { driverId: '11', givenName: 'Sergio', familyName: 'Perez' }, Constructors: [{ name: 'Cadillac' }] },
+    { position: '22', Driver: { driverId: '77', givenName: 'Valtteri', familyName: 'Bottas' }, Constructors: [{ name: 'Cadillac' }] },
+  ];
+
+  const constructors2026 = [
+    { position: '1', Constructor: { constructorId: 'mclaren', name: 'McLaren' }, engine: 'Mercedes' },
+    { position: '2', Constructor: { constructorId: 'ferrari', name: 'Ferrari' }, engine: 'Ferrari' },
+    { position: '3', Constructor: { constructorId: 'red_bull', name: 'Red Bull' }, engine: 'Red Bull Ford' },
+    { position: '4', Constructor: { constructorId: 'mercedes', name: 'Mercedes' }, engine: 'Mercedes' },
+    { position: '5', Constructor: { constructorId: 'aston_martin', name: 'Aston Martin' }, engine: 'Honda' },
+    { position: '6', Constructor: { constructorId: 'alpine', name: 'Alpine' }, engine: 'Mercedes' },
+    { position: '7', Constructor: { constructorId: 'williams', name: 'Williams' }, engine: 'Mercedes' },
+    { position: '8', Constructor: { constructorId: 'haas', name: 'Haas' }, engine: 'Ferrari' },
+    { position: '9', Constructor: { constructorId: 'racing_bulls', name: 'Racing Bulls' }, engine: 'Red Bull Ford' },
+    { position: '10', Constructor: { constructorId: 'audi', name: 'Audi' }, engine: 'Audi' },
+    { position: '11', Constructor: { constructorId: 'cadillac', name: 'Cadillac' }, engine: 'Ferrari' },
+  ];
+
+  const raceSchedule = [
+    { date: 'Mar 6-8', name: 'Australian GP', location: 'Melbourne', pickType: '1 Driver' },
+    { date: 'Mar 13-15', name: 'Chinese GP', location: 'Shanghai', pickType: 'Sprint - Constructor' },
+    { date: 'Mar 27-29', name: 'Japanese GP', location: 'Suzuka', pickType: '1 Driver' },
+    { date: 'Apr 10-12', name: 'Bahrain GP', location: 'Sakhir', pickType: '1 Driver' },
+    { date: 'Apr 17-19', name: 'Saudi Arabian GP', location: 'Jeddah', pickType: '1 Driver' },
+    { date: 'May 1-3', name: 'Miami GP', location: 'Miami', pickType: 'Sprint - Constructor' },
+    { date: 'May 22-24', name: 'Canadian GP', location: 'Montreal', pickType: 'Sprint - Constructor' },
+    { date: 'Jun 5-7', name: 'Monaco GP', location: 'Monaco', pickType: '1 Driver' },
+    { date: 'Jun 12-14', name: 'Barcelona GP', location: 'Barcelona', pickType: '1 Driver' },
+    { date: 'Jun 26-28', name: 'Austrian GP', location: 'Spielberg', pickType: '2 Drivers' },
+    { date: 'Jul 3-5', name: 'British GP', location: 'Silverstone', pickType: 'Sprint - Constructor' },
+    { date: 'Jul 17-19', name: 'Belgian GP', location: 'Spa', pickType: '1 Driver' },
+    { date: 'Jul 24-26', name: 'Hungarian GP', location: 'Budapest', pickType: '1 Driver' },
+    { date: 'Aug 21-23', name: 'Dutch GP', location: 'Zandvoort', pickType: 'Sprint - Constructor' },
+    { date: 'Sep 4-6', name: 'Italian GP', location: 'Monza', pickType: '1 Driver' },
+    { date: 'Sep 11-13', name: 'Spanish GP', location: 'Madrid', pickType: '1 Driver' },
+    { date: 'Sep 25-26', name: 'Azerbaijan GP', location: 'Baku', pickType: '2 Drivers' },
+    { date: 'Oct 9-11', name: 'Singapore GP', location: 'Singapore', pickType: 'Sprint - Constructor' },
+    { date: 'Oct 23-25', name: 'US GP', location: 'Austin', pickType: '1 Driver' },
+    { date: 'Oct 30-Nov 1', name: 'Mexico City GP', location: 'Mexico City', pickType: '1 Driver' },
+    { date: 'Nov 6-8', name: 'Sao Paulo GP', location: 'Sao Paulo', pickType: '1 Driver' },
+    { date: 'Nov 21-22', name: 'Las Vegas GP', location: 'Las Vegas', pickType: '2 Drivers' },
+    { date: 'Nov 27-29', name: 'Qatar GP', location: 'Losail', pickType: '1 Driver' },
+    { date: 'Dec 4-6', name: 'Abu Dhabi GP', location: 'Yas Marina', pickType: '1 Driver' }
+  ];
+
+  const oottDrivers = ['Colapinto', 'Bearman', 'Ocon', 'Stroll', 'Bortoleto', 'Hulkenberg', 'Lawson', 'Lindblad', 'Bottas', 'Perez', 'Hadjar', 'Gasly'];
+  const oot6Constructors = ['Aston Martin', 'Haas', 'Audi', 'Cadillac', 'Alpine'];
+
+  const [activeTab, setActiveTab] = useState('standings');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showAuth, setShowAuth] = useState(true);
+  const [authMode, setAuthMode] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [userPicks, setUserPicks] = useState({});
+  const [selectedRace, setSelectedRace] = useState(null);
+  const [selectedDrivers, setSelectedDrivers] = useState([]);
+  const [selectedConstructor, setSelectedConstructor] = useState('');
+  const [users, setUsers] = useState([
+    { id: 1, email: 'demo1@email.com', password: 'password', nickname: 'SpeedDemon', points: 245, picks: 12 },
+    { id: 2, email: 'demo2@email.com', password: 'password', nickname: 'F1Fanatic', points: 198, picks: 10 },
+    { id: 3, email: 'demo3@email.com', password: 'password', nickname: 'RaceWinner', points: 176, picks: 9 },
+    { id: 4, email: 'demo4@email.com', password: 'password', nickname: 'PolePosition', points: 134, picks: 8 }
+  ]);
+
+  const isOOTT = (name) => oottDrivers.some(d => name.includes(d));
+  const isOOT6 = (name) => oot6Constructors.includes(name);
+
+  const handleLogin = () => {
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) { setCurrentUser(user); setShowAuth(false); setAuthError(''); setEmail(''); setPassword(''); }
+    else { setAuthError('Invalid email or password'); }
+  };
+
+  const handleRegister = () => {
+    if (!nickname || nickname.length < 3) { setAuthError('Nickname must be at least 3 characters'); return; }
+    if (!email || !email.includes('@')) { setAuthError('Please enter a valid email'); return; }
+    if (!password || password.length < 6) { setAuthError('Password must be at least 6 characters'); return; }
+    if (password !== confirmPassword) { setAuthError('Passwords do not match'); return; }
+    if (users.find(u => u.email === email)) { setAuthError('Email already registered'); return; }
+    const newUser = { id: users.length + 1, email, password, nickname, points: 0, picks: 0 };
+    setUsers([...users, newUser]); setCurrentUser(newUser); setShowAuth(false); setAuthError('');
+    setEmail(''); setPassword(''); setConfirmPassword(''); setNickname('');
+  };
+
+  const savePick = () => {
+    if (!selectedRace || !currentUser) return;
+    const key = currentUser.id + '-' + selectedRace.name;
+    const pickData = { picks: selectedRace.pickType.includes('Constructor') ? { constructor: selectedConstructor } : { drivers: [...selectedDrivers] } };
+    setUserPicks({ ...userPicks, [key]: pickData });
+    setUsers(users.map(u => u.id === currentUser.id ? { ...u, picks: u.picks + 1 } : u));
+    setCurrentUser({ ...currentUser, picks: currentUser.picks + 1 });
+    setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor('');
+  };
+
+  const isDriverPicked = (id) => currentUser && Object.values(userPicks).some(p => p.picks && p.picks.drivers && p.picks.drivers.includes(id));
+  const getUserPick = (name) => currentUser ? userPicks[currentUser.id + '-' + name] : null;
+
+  const s = {
+    container: { minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: 'white', fontFamily: 'system-ui, sans-serif' },
+    card: { background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(100, 116, 139, 0.3)', marginBottom: '16px' },
+    btn: { padding: '12px 24px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '14px' },
+    btnRed: { background: '#dc2626', color: 'white' },
+    btnGray: { background: 'rgba(71, 85, 105, 0.5)', color: '#cbd5e1' },
+    btnGreen: { background: '#16a34a', color: 'white' },
+    input: { padding: '14px', background: 'rgba(51, 65, 85, 0.5)', border: '1px solid #475569', borderRadius: '12px', color: 'white', fontSize: '16px', width: '100%', boxSizing: 'border-box', outline: 'none' },
+    header: { background: 'linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ea580c 100%)', padding: '16px' },
+    nav: { background: 'rgba(30, 41, 59, 0.9)', padding: '12px 16px', borderBottom: '1px solid rgba(71, 85, 105, 0.5)', position: 'sticky', top: 0, zIndex: 10 },
+    badge: { fontSize: '12px', padding: '4px 10px', borderRadius: '999px', fontWeight: '600' },
+    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }
+  };
+
+  if (showAuth) {
+    return (
+      <div style={{ ...s.container, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ ...s.card, maxWidth: '400px', width: '100%' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <div style={{ display: 'inline-block', padding: '16px 28px', background: 'linear-gradient(135deg, #dc2626, #ea580c)', borderRadius: '16px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '32px', fontWeight: '900' }}>F1</span>
+            </div>
+            <h1 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0' }}>FANTASY LEAGUE</h1>
+            <p style={{ color: '#f87171', fontWeight: '600', margin: 0 }}>2026 SEASON</p>
+            <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '8px' }}>22 Drivers • 11 Teams • 24 Races</p>
+          </div>
+          
+          <div style={{ display: 'flex', background: 'rgba(51, 65, 85, 0.5)', borderRadius: '12px', padding: '4px', marginBottom: '24px' }}>
+            <button onClick={() => { setAuthMode('login'); setAuthError(''); }} style={{ ...s.btn, flex: 1, background: authMode === 'login' ? '#dc2626' : 'transparent', color: authMode === 'login' ? 'white' : '#94a3b8' }}>Login</button>
+            <button onClick={() => { setAuthMode('register'); setAuthError(''); }} style={{ ...s.btn, flex: 1, background: authMode === 'register' ? '#dc2626' : 'transparent', color: authMode === 'register' ? 'white' : '#94a3b8' }}>Register</button>
+          </div>
+
+          {authError && <div style={{ background: 'rgba(127, 29, 29, 0.5)', border: '1px solid #dc2626', color: '#fca5a5', padding: '12px', borderRadius: '12px', marginBottom: '16px', fontSize: '14px' }}>{authError}</div>}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {authMode === 'register' && <input type="text" placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} style={s.input} />}
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={s.input} />
+            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={s.input} />
+            {authMode === 'register' && <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={s.input} />}
+            <button onClick={authMode === 'login' ? handleLogin : handleRegister} style={{ ...s.btn, ...s.btnRed, width: '100%', padding: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>{authMode === 'login' ? 'Login' : 'Create Account'}</button>
+          </div>
+
+          {authMode === 'login' && (
+            <div style={{ marginTop: '24px', textAlign: 'center', background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}>
+              <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 8px 0' }}>Demo: demo1@email.com / password</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={s.container}>
+      <header style={s.header}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div>
+            <div>
+              <h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>FANTASY LEAGUE 2026</h1>
+              <p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}>
+              <span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span>
+              <span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span>
+            </div>
+            <button onClick={() => { setCurrentUser(null); setShowAuth(true); }} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <nav style={s.nav}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>
+          {['standings', 'picks', 'schedule', 'drivers', 'teams'].map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+              {tab === 'picks' ? 'My Picks' : tab}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
+        {activeTab === 'standings' && (
+          <div style={s.card}>
+            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏆 League Standings</h2>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(100, 116, 139, 0.3)' }}>
+                  <th style={{ textAlign: 'left', padding: '12px', color: '#94a3b8' }}>Pos</th>
+                  <th style={{ textAlign: 'left', padding: '12px', color: '#94a3b8' }}>Player</th>
+                  <th style={{ textAlign: 'left', padding: '12px', color: '#94a3b8' }}>Points</th>
+                  <th style={{ textAlign: 'left', padding: '12px', color: '#94a3b8' }}>Picks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.sort((a, b) => b.points - a.points).map((user, i) => (
+                  <tr key={user.id} style={{ borderBottom: '1px solid rgba(100, 116, 139, 0.2)', background: currentUser && user.id === currentUser.id ? 'rgba(220, 38, 38, 0.1)' : 'transparent' }}>
+                    <td style={{ padding: '12px' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', fontWeight: '700', background: i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#fb923c' : '#475569', color: i < 3 ? '#000' : '#fff' }}>{i + 1}</span>
+                    </td>
+                    <td style={{ padding: '12px', fontWeight: '600' }}>{user.nickname}{currentUser && user.id === currentUser.id && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(220, 38, 38, 0.3)', color: '#fca5a5', padding: '2px 8px', borderRadius: '999px' }}>You</span>}</td>
+                    <td style={{ padding: '12px', fontSize: '20px', fontWeight: '700' }}>{user.points}</td>
+                    <td style={{ padding: '12px', color: '#94a3b8' }}>{user.picks}/24</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === 'picks' && (
+          <div style={s.card}>
+            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 My Picks</h2>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ background: 'rgba(34, 197, 94, 0.1)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                <p style={{ color: '#94a3b8', fontSize: '13px', margin: '0 0 4px 0' }}>Picks Made</p>
+                <p style={{ fontSize: '32px', fontWeight: '800', color: '#4ade80', margin: 0 }}>{Object.keys(userPicks).filter(k => currentUser && k.startsWith(currentUser.id + '-')).length}/24</p>
+              </div>
+              <div style={{ background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <p style={{ color: '#94a3b8', fontSize: '13px', margin: '0 0 4px 0' }}>Drivers Used</p>
+                <p style={{ fontSize: '32px', fontWeight: '800', color: '#60a5fa', margin: 0 }}>{Object.values(userPicks).filter(p => p.picks && p.picks.drivers).flatMap(p => p.picks.drivers).length}</p>
+              </div>
+            </div>
+
+            {!selectedRace ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {raceSchedule.map((race, i) => {
+                  const pick = getUserPick(race.name);
+                  return (
+                    <div key={i} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: pick ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: '700', background: '#475569', padding: '3px 7px', borderRadius: '4px' }}>R{i + 1}</span>
+                          <span style={{ fontWeight: '700' }}>{race.name}</span>
+                        </div>
+                        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.location}</p>
+                        <span style={{ ...s.badge, background: race.pickType.includes('Constructor') ? 'rgba(168, 85, 247, 0.2)' : race.pickType.includes('2') ? 'rgba(251, 146, 60, 0.2)' : 'rgba(74, 222, 128, 0.2)', color: race.pickType.includes('Constructor') ? '#c084fc' : race.pickType.includes('2') ? '#fb923c' : '#4ade80' }}>{race.pickType}</span>
+                        {pick && <p style={{ color: '#4ade80', fontSize: '13px', marginTop: '6px' }}>✓ {pick.picks && pick.picks.drivers ? pick.picks.drivers.join(', ') : pick.picks && pick.picks.constructor}</p>}
+                      </div>
+                      {!pick && <button onClick={() => setSelectedRace(race)} style={{ ...s.btn, ...s.btnRed, padding: '8px 16px' }}>Pick</button>}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '20px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0' }}>{selectedRace.name}</h3>
+                <p style={{ color: '#94a3b8', margin: '0 0 20px 0' }}>{selectedRace.pickType}</p>
+
+                {selectedRace.pickType.includes('Constructor') ? (
+                  <div style={s.grid}>
+                    {constructors2026.map(c => (
+                      <button key={c.Constructor.constructorId} onClick={() => setSelectedConstructor(c.Constructor.name)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: 'pointer', border: selectedConstructor === c.Constructor.name ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: selectedConstructor === c.Constructor.name ? '#dc2626' : 'rgba(71, 85, 105, 0.3)', color: 'white' }}>
+                        <div style={{ fontWeight: '700' }}>{c.Constructor.name}</div>
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '11px', background: 'rgba(71, 85, 105, 0.5)', padding: '2px 6px', borderRadius: '4px' }}>#{c.position}</span>
+                          {isOOT6(c.Constructor.name) && <span style={{ fontSize: '11px', background: '#7c3aed', padding: '2px 6px', borderRadius: '4px' }}>2x</span>}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div>
+                    <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOTT (2x)</p>
+                    <div style={s.grid}>
+                      {drivers2026.map(d => {
+                        const id = d.Driver.driverId;
+                        const name = d.Driver.givenName + ' ' + d.Driver.familyName;
+                        const picked = isDriverPicked(id);
+                        const selected = selectedDrivers.includes(id);
+                        const max = selectedRace.pickType.includes('2') ? 2 : 1;
+                        return (
+                          <button key={id} onClick={() => { if (picked) return; if (selected) setSelectedDrivers(selectedDrivers.filter(x => x !== id)); else if (selectedDrivers.length < max) setSelectedDrivers([...selectedDrivers, id]); }} disabled={picked || (!selected && selectedDrivers.length >= max)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : 'rgba(34, 197, 94, 0.15)', color: picked ? '#64748b' : 'white', position: 'relative' }}>
+                            <div style={{ fontWeight: '600' }}>{name} {isOOTT(name) && '⭐'}</div>
+                            <div style={{ fontSize: '13px', color: selected ? '#fecaca' : '#94a3b8', marginTop: '4px' }}>{d.Constructors[0].name}</div>
+                            {picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}
+                            {selected && <div style={{ position: 'absolute', top: '8px', right: '8px', width: '22px', height: '22px', background: 'white', color: '#dc2626', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '11px' }}>{selectedDrivers.indexOf(id) + 1}</div>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                  <button onClick={savePick} disabled={(selectedRace.pickType.includes('Constructor') && !selectedConstructor) || (!selectedRace.pickType.includes('Constructor') && !selectedDrivers.length)} style={{ ...s.btn, ...s.btnGreen, opacity: ((selectedRace.pickType.includes('Constructor') && !selectedConstructor) || (!selectedRace.pickType.includes('Constructor') && !selectedDrivers.length)) ? 0.5 : 1 }}>Confirm</button>
+                  <button onClick={() => { setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor(''); }} style={{ ...s.btn, ...s.btnGray }}>Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'schedule' && (
+          <div style={s.card}>
+            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📅 2026 Calendar</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {raceSchedule.map((race, i) => (
+                <div key={i} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <span style={{ fontSize: '20px', fontWeight: '800', color: '#475569', width: '36px' }}>{i + 1}</span>
+                    <div>
+                      <span style={{ fontWeight: '700' }}>{race.name}</span>
+                      <p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{race.location} • {race.date}</p>
+                    </div>
+                  </div>
+                  <span style={{ ...s.badge, background: race.pickType.includes('Constructor') ? '#7c3aed' : race.pickType.includes('2') ? '#ea580c' : '#16a34a' }}>{race.pickType}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'drivers' && (
+          <div style={s.card}>
+            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏎️ 2026 Drivers</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {drivers2026.map(d => {
+                const name = d.Driver.givenName + ' ' + d.Driver.familyName;
+                return (
+                  <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{d.Driver.driverId}</span>
+                      <div>
+                        <span style={{ fontWeight: '700' }}>{name} {isOOTT(name) && '⭐'}</span>
+                        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{d.Constructors[0].name}</p>
+                      </div>
+                    </div>
+                    {isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'teams' && (
+          <div style={s.card}>
+            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 2026 Teams</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {constructors2026.map(c => {
+                const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === c.Constructor.name);
+                return (
+                  <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      <span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{c.position}</span>
+                      <div>
+                        <span style={{ fontWeight: '700', fontSize: '16px' }}>{c.Constructor.name}</span>
+                        {isOOT6(c.Constructor.name) && <span style={{ marginLeft: '8px', ...s.badge, background: '#7c3aed' }}>OOT6 2x</span>}
+                        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>Engine: {c.engine}</p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      {teamDrivers.map(d => {
+                        const name = d.Driver.givenName + ' ' + d.Driver.familyName;
+                        return (
+                          <div key={d.Driver.driverId} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ width: '28px', height: '28px', background: '#475569', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>{d.Driver.driverId}</span>
+                            <span style={{ fontWeight: '600', fontSize: '14px' }}>{name}</span>
+                            {isOOTT(name) && <span>⭐</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer style={{ background: 'rgba(30, 41, 59, 0.5)', borderTop: '1px solid rgba(71, 85, 105, 0.3)', padding: '20px', marginTop: '20px', textAlign: 'center' }}>
+        <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>F1 Fantasy League • 2026 Season • 22 Drivers • 11 Teams</p>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
