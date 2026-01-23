@@ -74,30 +74,30 @@ function App() {
   ];
 
   const raceSchedule = [
-    { id: 1, date: 'Mar 6-8', name: 'Australian GP', location: 'Melbourne', pickType: 'Driver' },
-    { id: 2, date: 'Mar 13-15', name: 'Chinese GP', location: 'Shanghai', pickType: 'Constructor' },
-    { id: 3, date: 'Mar 27-29', name: 'Japanese GP', location: 'Suzuka', pickType: 'Driver' },
-    { id: 4, date: 'Apr 10-12', name: 'Bahrain GP', location: 'Sakhir', pickType: 'Driver' },
-    { id: 5, date: 'Apr 17-19', name: 'Saudi Arabian GP', location: 'Jeddah', pickType: 'Driver' },
-    { id: 6, date: 'May 1-3', name: 'Miami GP', location: 'Miami', pickType: 'Driver' },
-    { id: 7, date: 'May 22-24', name: 'Canadian GP', location: 'Montreal', pickType: 'Constructor' },
-    { id: 8, date: 'Jun 5-7', name: 'Monaco GP', location: 'Monaco', pickType: 'Driver' },
-    { id: 9, date: 'Jun 12-14', name: 'Barcelona GP', location: 'Barcelona', pickType: 'Driver' },
-    { id: 10, date: 'Jun 26-28', name: 'Austrian GP', location: 'Spielberg', pickType: 'Driver' },
-    { id: 11, date: 'Jul 3-5', name: 'British GP', location: 'Silverstone', pickType: 'Driver' },
-    { id: 12, date: 'Jul 17-19', name: 'Belgian GP', location: 'Spa', pickType: 'Driver' },
-    { id: 13, date: 'Jul 24-26', name: 'Hungarian GP', location: 'Budapest', pickType: 'Driver' },
-    { id: 14, date: 'Aug 21-23', name: 'Dutch GP', location: 'Zandvoort', pickType: 'Constructor' },
-    { id: 15, date: 'Sep 4-6', name: 'Italian GP', location: 'Monza', pickType: 'Driver' },
-    { id: 16, date: 'Sep 11-13', name: 'Spanish GP', location: 'Madrid', pickType: 'Driver' },
-    { id: 17, date: 'Sep 25-26', name: 'Azerbaijan GP', location: 'Baku', pickType: 'Driver' },
-    { id: 18, date: 'Oct 9-11', name: 'Singapore GP', location: 'Singapore', pickType: 'Constructor' },
-    { id: 19, date: 'Oct 23-25', name: 'US GP', location: 'Austin', pickType: 'Driver' },
-    { id: 20, date: 'Oct 30-Nov 1', name: 'Mexico City GP', location: 'Mexico City', pickType: 'Driver' },
-    { id: 21, date: 'Nov 6-8', name: 'Sao Paulo GP', location: 'Sao Paulo', pickType: 'Driver' },
-    { id: 22, date: 'Nov 21-22', name: 'Las Vegas GP', location: 'Las Vegas', pickType: 'Driver' },
-    { id: 23, date: 'Nov 27-29', name: 'Qatar GP', location: 'Losail', pickType: 'Driver' },
-    { id: 24, date: 'Dec 4-6', name: 'Abu Dhabi GP', location: 'Yas Marina', pickType: 'Driver' }
+    { id: 1, date: 'Mar 6-8', name: 'Australian GP', location: 'Melbourne', pickType: 'Driver', sprint: false },
+    { id: 2, date: 'Mar 13-15', name: 'Chinese GP', location: 'Shanghai', pickType: 'Constructor', sprint: true },
+    { id: 3, date: 'Mar 27-29', name: 'Japanese GP', location: 'Suzuka', pickType: 'Driver', sprint: false },
+    { id: 4, date: 'Apr 10-12', name: 'Bahrain GP', location: 'Sakhir', pickType: 'Driver', sprint: false },
+    { id: 5, date: 'Apr 17-19', name: 'Saudi Arabian GP', location: 'Jeddah', pickType: 'Driver', sprint: false },
+    { id: 6, date: 'May 1-3', name: 'Miami GP', location: 'Miami', pickType: 'Driver', sprint: true },
+    { id: 7, date: 'May 22-24', name: 'Canadian GP', location: 'Montreal', pickType: 'Constructor', sprint: false },
+    { id: 8, date: 'Jun 5-7', name: 'Monaco GP', location: 'Monaco', pickType: 'Driver', sprint: false },
+    { id: 9, date: 'Jun 12-14', name: 'Barcelona GP', location: 'Barcelona', pickType: 'Driver', sprint: false },
+    { id: 10, date: 'Jun 26-28', name: 'Austrian GP', location: 'Spielberg', pickType: 'Driver', sprint: true },
+    { id: 11, date: 'Jul 3-5', name: 'British GP', location: 'Silverstone', pickType: 'Driver', sprint: false },
+    { id: 12, date: 'Jul 17-19', name: 'Belgian GP', location: 'Spa', pickType: 'Driver', sprint: false },
+    { id: 13, date: 'Jul 24-26', name: 'Hungarian GP', location: 'Budapest', pickType: 'Driver', sprint: false },
+    { id: 14, date: 'Aug 21-23', name: 'Dutch GP', location: 'Zandvoort', pickType: 'Constructor', sprint: false },
+    { id: 15, date: 'Sep 4-6', name: 'Italian GP', location: 'Monza', pickType: 'Driver', sprint: false },
+    { id: 16, date: 'Sep 11-13', name: 'Spanish GP', location: 'Madrid', pickType: 'Driver', sprint: false },
+    { id: 17, date: 'Sep 25-26', name: 'Azerbaijan GP', location: 'Baku', pickType: 'Driver', sprint: false },
+    { id: 18, date: 'Oct 9-11', name: 'Singapore GP', location: 'Singapore', pickType: 'Constructor', sprint: true },
+    { id: 19, date: 'Oct 23-25', name: 'US GP', location: 'Austin', pickType: 'Driver', sprint: true },
+    { id: 20, date: 'Oct 30-Nov 1', name: 'Mexico City GP', location: 'Mexico City', pickType: 'Driver', sprint: false },
+    { id: 21, date: 'Nov 6-8', name: 'Sao Paulo GP', location: 'Sao Paulo', pickType: 'Driver', sprint: true },
+    { id: 22, date: 'Nov 21-22', name: 'Las Vegas GP', location: 'Las Vegas', pickType: 'Driver', sprint: false },
+    { id: 23, date: 'Nov 27-29', name: 'Qatar GP', location: 'Losail', pickType: 'Driver', sprint: false },
+    { id: 24, date: 'Dec 4-6', name: 'Abu Dhabi GP', location: 'Yas Marina', pickType: 'Driver', sprint: false }
   ];
 
   const oottDrivers = ['Colapinto', 'Bearman', 'Ocon', 'Stroll', 'Bortoleto', 'Hulkenberg', 'Lawson', 'Lindblad', 'Bottas', 'Perez', 'Hadjar', 'Gasly'];
@@ -359,11 +359,11 @@ function App() {
   return (
     <div style={s.container}>
       <header style={s.header}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>FANTASY LEAGUE 2026</h1><p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p></div></div><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}><span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span><span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span></div><button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button></div></div></header>
-      <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>{['standings', 'picks', 'schedule', 'rules', 'drivers', 'teams'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{tab === 'picks' ? 'My Picks' : tab}</button>)}</div></nav>
+      <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>{['standings', 'picks', 'schedule', 'rules', 'economics', 'drivers', 'teams'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{tab === 'picks' ? 'My Picks' : tab}</button>)}</div></nav>
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
         {activeTab === 'standings' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏆 League Standings</h2><table style={s.table}><thead><tr><th style={s.th}>Pos</th><th style={s.th}>Player</th><th style={s.th}>Points</th><th style={s.th}>Picks</th></tr></thead><tbody>{users.sort((a, b) => (b.points || 0) - (a.points || 0)).map((user, i) => <tr key={user.id} style={{ background: currentUser && user.id === currentUser.id ? 'rgba(220, 38, 38, 0.1)' : 'transparent' }}><td style={s.td}><span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', fontWeight: '700', background: i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#fb923c' : '#475569', color: i < 3 ? '#000' : '#fff' }}>{i + 1}</span></td><td style={s.td}><strong>{user.nickname}</strong>{currentUser && user.id === currentUser.id && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(220, 38, 38, 0.3)', color: '#fca5a5', padding: '2px 8px', borderRadius: '999px' }}>You</span>}</td><td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td><td style={s.td}>{user.picks || 0}/24</td></tr>)}</tbody></table></div>}
         {activeTab === 'picks' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 My Picks</h2>{!selectedRace ? <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => { const pick = getUserPick(race.id); const locked = isRaceLocked(race.id); return <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: pick ? '1px solid rgba(74, 222, 128, 0.3)' : locked ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}><div><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ fontSize: '11px', fontWeight: '700', background: '#475569', padding: '3px 7px', borderRadius: '4px' }}>R{i + 1}</span><span style={{ fontWeight: '700' }}>{race.name}</span>{locked && <span style={{ fontSize: '11px', background: 'rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '3px 7px', borderRadius: '4px' }}>🔒 Locked</span>}</div><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.location}</p><span style={{ ...s.badge, background: race.pickType === 'Constructor' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(74, 222, 128, 0.2)', color: race.pickType === 'Constructor' ? '#c084fc' : '#4ade80' }}>{race.pickType === 'Constructor' ? 'Constructor' : 'Driver'}</span>{pick && <p style={{ color: '#4ade80', fontSize: '13px', marginTop: '6px' }}>✓ {pick.picks && pick.picks.drivers ? pick.picks.drivers.map(id => { const d = drivers2026.find(x => x.Driver.driverId === id); return d ? d.Driver.familyName : id; }).join(', ') : (pick.picks && pick.picks.constructor)}</p>}</div>{!pick && !locked && <button onClick={() => setSelectedRace(race)} style={{ ...s.btn, ...s.btnRed, padding: '8px 16px' }}>Pick</button>}{!pick && locked && <span style={{ color: '#64748b', fontSize: '13px' }}>Picks closed</span>}</div>; })}</div> : <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '20px' }}><h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0' }}>{selectedRace.name}</h3><p style={{ color: '#94a3b8', margin: '0 0 20px 0' }}>{selectedRace.pickType === 'Constructor' ? 'Pick 1 Constructor' : (getDoublePickCount() < 2 ? 'Pick 1 or 2 Drivers' : 'Pick 1 Driver (2-driver picks used)')}</p>{selectedRace.pickType === 'Constructor' ? <div><p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOT6 (2x)</p><div style={s.grid}>{constructors2026.map(c => { const picked = isConstructorPicked(c.Constructor.name); const selected = selectedConstructor === c.Constructor.name; return <button key={c.Constructor.constructorId} onClick={() => { if (picked) return; setSelectedConstructor(c.Constructor.name); }} disabled={picked} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : 'rgba(168, 85, 247, 0.15)', color: picked ? '#64748b' : 'white', position: 'relative' }}><div style={{ fontWeight: '700' }}>{c.Constructor.name}</div><div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}><span style={{ fontSize: '11px', background: 'rgba(71, 85, 105, 0.5)', padding: '2px 6px', borderRadius: '4px' }}>#{c.position}</span>{isOOT6(c.Constructor.name) && <span style={{ fontSize: '11px', background: '#7c3aed', padding: '2px 6px', borderRadius: '4px' }}>2x</span>}</div>{picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}</button>; })}</div></div> : <div><p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOTT (2x) | Double picks remaining: {2 - getDoublePickCount()}/2</p><div style={s.grid}>{drivers2026.map(d => { const id = d.Driver.driverId; const name = d.Driver.givenName + ' ' + d.Driver.familyName; const picked = isDriverPicked(id); const selected = selectedDrivers.includes(id); const canPickTwo = getDoublePickCount() < 2; const max = canPickTwo ? 2 : 1; return <button key={id} onClick={() => { if (picked) return; if (selected) setSelectedDrivers(selectedDrivers.filter(x => x !== id)); else if (selectedDrivers.length < max) setSelectedDrivers([...selectedDrivers, id]); }} disabled={picked || (!selected && selectedDrivers.length >= max)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : 'rgba(34, 197, 94, 0.15)', color: picked ? '#64748b' : 'white', position: 'relative' }}><div style={{ fontWeight: '600' }}>{name} {isOOTT(name) && '⭐'}</div><div style={{ fontSize: '13px', color: selected ? '#fecaca' : '#94a3b8', marginTop: '4px' }}>{d.Constructors[0].name}</div>{picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}{selected && <div style={{ position: 'absolute', top: '8px', right: '8px', width: '22px', height: '22px', background: 'white', color: '#dc2626', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '11px' }}>{selectedDrivers.indexOf(id) + 1}</div>}</button>; })}</div></div>}<div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}><button onClick={savePick} disabled={(selectedRace.pickType === 'Constructor' && !selectedConstructor) || (selectedRace.pickType !== 'Constructor' && selectedDrivers.length === 0)} style={{ ...s.btn, ...s.btnGreen, opacity: ((selectedRace.pickType === 'Constructor' && !selectedConstructor) || (selectedRace.pickType !== 'Constructor' && selectedDrivers.length === 0)) ? 0.5 : 1 }}>Confirm{selectedRace.pickType !== 'Constructor' && selectedDrivers.length > 0 && ` (${selectedDrivers.length} driver${selectedDrivers.length > 1 ? 's' : ''})`}</button><button onClick={() => { setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor(''); }} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div></div>}</div>}
-        {activeTab === 'schedule' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📅 2026 Calendar</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ fontSize: '20px', fontWeight: '800', color: '#475569', width: '36px' }}>{i + 1}</span><div><span style={{ fontWeight: '700' }}>{race.name}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{race.location} • {race.date}</p></div></div><span style={{ ...s.badge, background: race.pickType === 'Constructor' ? '#7c3aed' : '#16a34a' }}>{race.pickType === 'Constructor' ? 'Constructor' : 'Driver'}</span></div>)}</div></div>}
+        {activeTab === 'schedule' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📅 2026 Calendar</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ fontSize: '20px', fontWeight: '800', color: '#475569', width: '36px' }}>{i + 1}</span><div><span style={{ fontWeight: '700' }}>{race.name}</span>{race.sprint && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(168, 85, 247, 0.3)', color: '#c084fc', padding: '2px 8px', borderRadius: '4px' }}>⚡ Sprint</span>}<p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{race.location} • {race.date}</p></div></div><span style={{ ...s.badge, background: race.pickType === 'Constructor' ? '#7c3aed' : '#16a34a' }}>{race.pickType === 'Constructor' ? 'Constructor' : 'Driver'}</span></div>)}</div></div>}
 
         {activeTab === 'rules' && <div style={s.card}>
           <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📖 2026 Season Rules</h2>
@@ -417,7 +417,237 @@ function App() {
               <li>20 Driver races (pick 1 driver for 18, pick 2 drivers for 2 of your choice) + 4 Constructor races = 24 total</li>
             </ul>
           </div>
+
+          <div style={{ background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '12px', padding: '20px', marginTop: '16px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#fbbf24' }}>💰 Economics</h3>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <h4 style={{ color: '#fbbf24', margin: '0 0 8px 0' }}>Season Entry Fee: $400</h4>
+              <p style={{ color: '#cbd5e1', margin: '0 0 8px 0' }}>Payable at end of season. Payout based on final standings:</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <span style={{ background: 'rgba(251, 191, 36, 0.2)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>🥇 P1: 45%</span>
+                <span style={{ background: 'rgba(156, 163, 175, 0.2)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>🥈 P2: 20%</span>
+                <span style={{ background: 'rgba(251, 146, 60, 0.2)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>🥉 P3: 15%</span>
+                <span style={{ background: 'rgba(71, 85, 105, 0.4)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>P4: 10%</span>
+                <span style={{ background: 'rgba(71, 85, 105, 0.4)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>P5: 5%</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <h4 style={{ color: '#4ade80', margin: '0 0 8px 0' }}>Weekly Race Pool: $20 × 24 races = $480</h4>
+              <p style={{ color: '#94a3b8', margin: 0, fontSize: '14px' }}>Highest finishing position wins. Ties split the pot. No carryovers.</p>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <h4 style={{ color: '#c084fc', margin: '0 0 8px 0' }}>Sprint Race Pool: $20 × 6 sprints = $120</h4>
+              <p style={{ color: '#94a3b8', margin: 0, fontSize: '14px' }}>Highest finishing position wins. Ties split the pot. No carryovers.</p>
+            </div>
+
+            <div style={{ background: 'rgba(251, 191, 36, 0.15)', borderRadius: '8px', padding: '12px', marginTop: '16px' }}>
+              <h4 style={{ color: '#fbbf24', margin: '0 0 8px 0' }}>💵 Total Investment Per Poolie: $1,000</h4>
+              <div style={{ color: '#cbd5e1', fontSize: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}><span>Entry Fee</span><span>$400</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}><span>Weekly Grand Prix (24)</span><span>$480</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(251, 191, 36, 0.3)', paddingBottom: '4px', marginBottom: '4px' }}><span>Sprint Races (6)</span><span>$120</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700' }}><span>Total</span><span>$1,000</span></div>
+              </div>
+            </div>
+          </div>
         </div>}
+
+        {activeTab === 'economics' && <div style={s.card}>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>💰 Economics Dashboard</h2>
+          
+          {(() => {
+            const numPoolies = users.length;
+            const entryFeePool = numPoolies * 400;
+            const weeklyPool = numPoolies * 20;
+            const sprintPool = numPoolies * 20;
+            const totalPool = numPoolies * 1000;
+            
+            const seasonPayouts = [
+              { place: 1, pct: 0.45, label: '🥇 P1' },
+              { place: 2, pct: 0.20, label: '🥈 P2' },
+              { place: 3, pct: 0.15, label: '🥉 P3' },
+              { place: 4, pct: 0.10, label: 'P4' },
+              { place: 5, pct: 0.05, label: 'P5' }
+            ];
+            
+            const sortedUsers = [...users].sort((a, b) => (b.points || 0) - (a.points || 0));
+            
+            const getRaceWinners = (raceId, isSprint = false) => {
+              const race = raceSchedule.find(r => r.id === raceId);
+              const result = raceResults[raceId];
+              if (!result || !result.driverPositions) return [];
+              
+              let bestPos = 999;
+              let winners = [];
+              
+              users.forEach(user => {
+                const pick = userPicks[user.id + '-' + raceId];
+                if (!pick || !pick.picks) return;
+                
+                let userBestPos = 999;
+                
+                if (pick.picks.drivers) {
+                  pick.picks.drivers.forEach(driverId => {
+                    const driverResult = result.driverPositions[driverId];
+                    if (driverResult && driverResult.position > 0 && driverResult.position < userBestPos) {
+                      userBestPos = driverResult.position;
+                    }
+                  });
+                }
+                
+                if (pick.picks.constructor) {
+                  const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === pick.picks.constructor);
+                  teamDrivers.forEach(d => {
+                    const driverResult = result.driverPositions[d.Driver.driverId];
+                    if (driverResult && driverResult.position > 0 && driverResult.position < userBestPos) {
+                      userBestPos = driverResult.position;
+                    }
+                  });
+                }
+                
+                if (userBestPos < bestPos) {
+                  bestPos = userBestPos;
+                  winners = [{ user, pos: userBestPos }];
+                } else if (userBestPos === bestPos && userBestPos < 999) {
+                  winners.push({ user, pos: userBestPos });
+                }
+              });
+              
+              return winners;
+            };
+            
+            const userEarnings = {};
+            users.forEach(u => { userEarnings[u.id] = { season: 0, weekly: 0, sprint: 0, total: 0 }; });
+            
+            sortedUsers.forEach((user, idx) => {
+              if (idx < 5 && seasonPayouts[idx]) {
+                userEarnings[user.id].season = Math.round(entryFeePool * seasonPayouts[idx].pct);
+              }
+            });
+            
+            const raceWinnersList = [];
+            const sprintWinnersList = [];
+            
+            raceSchedule.forEach(race => {
+              const result = raceResults[race.id];
+              if (result && result.driverPositions) {
+                const winners = getRaceWinners(race.id);
+                if (winners.length > 0) {
+                  const prize = Math.round(weeklyPool / winners.length);
+                  winners.forEach(w => { userEarnings[w.user.id].weekly += prize; });
+                  raceWinnersList.push({ race, winners, prize });
+                }
+                
+                if (race.sprint) {
+                  const sprintWinners = getRaceWinners(race.id, true);
+                  if (sprintWinners.length > 0) {
+                    const sprintPrize = Math.round(sprintPool / sprintWinners.length);
+                    sprintWinners.forEach(w => { userEarnings[w.user.id].sprint += sprintPrize; });
+                    sprintWinnersList.push({ race, winners: sprintWinners, prize: sprintPrize });
+                  }
+                }
+              }
+            });
+            
+            users.forEach(u => {
+              userEarnings[u.id].total = userEarnings[u.id].season + userEarnings[u.id].weekly + userEarnings[u.id].sprint - 1000;
+            });
+            
+            return (<div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ background: 'rgba(251, 191, 36, 0.15)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '14px', color: '#94a3b8' }}>Poolies</div>
+                  <div style={{ fontSize: '32px', fontWeight: '700', color: '#fbbf24' }}>{numPoolies}</div>
+                </div>
+                <div style={{ background: 'rgba(74, 222, 128, 0.15)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '14px', color: '#94a3b8' }}>Total Pool</div>
+                  <div style={{ fontSize: '32px', fontWeight: '700', color: '#4ade80' }}>${totalPool.toLocaleString()}</div>
+                </div>
+                <div style={{ background: 'rgba(96, 165, 250, 0.15)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '14px', color: '#94a3b8' }}>Entry Fee Pool</div>
+                  <div style={{ fontSize: '32px', fontWeight: '700', color: '#60a5fa' }}>${entryFeePool.toLocaleString()}</div>
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#fbbf24' }}>🏆 Season Standings Payouts</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {seasonPayouts.map((p, idx) => {
+                    const user = sortedUsers[idx];
+                    const payout = Math.round(entryFeePool * p.pct);
+                    return <div key={p.place} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '12px' }}>
+                      <div><span style={{ fontWeight: '700', marginRight: '12px' }}>{p.label}</span><span style={{ color: user ? '#fff' : '#64748b' }}>{user ? user.nickname : 'TBD'}</span>{user && <span style={{ color: '#94a3b8', marginLeft: '8px' }}>({user.points || 0} pts)</span>}</div>
+                      <div style={{ fontWeight: '700', color: '#4ade80' }}>${payout.toLocaleString()}</div>
+                    </div>;
+                  })}
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#4ade80' }}>🏁 Weekly Race Winners (${weeklyPool}/race)</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                  {raceSchedule.map(race => {
+                    const raceWinner = raceWinnersList.find(r => r.race.id === race.id);
+                    const hasResult = raceResults[race.id];
+                    return <div key={race.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px 12px', fontSize: '14px' }}>
+                      <div><span style={{ color: '#94a3b8', marginRight: '8px' }}>R{race.id}</span><span>{race.name}</span></div>
+                      {raceWinner ? <div style={{ color: '#4ade80' }}>{raceWinner.winners.map(w => w.user.nickname).join(', ')} (P{raceWinner.winners[0].pos}) - ${raceWinner.prize}</div> : <span style={{ color: '#64748b' }}>{hasResult ? 'No winner' : 'Pending'}</span>}
+                    </div>;
+                  })}
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#c084fc' }}>⚡ Sprint Race Winners (${sprintPool}/sprint)</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {raceSchedule.filter(r => r.sprint).map(race => {
+                    const sprintWinner = sprintWinnersList.find(r => r.race.id === race.id);
+                    const hasResult = raceResults[race.id];
+                    return <div key={race.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px 12px', fontSize: '14px' }}>
+                      <div><span style={{ color: '#94a3b8', marginRight: '8px' }}>R{race.id}</span><span>{race.name}</span></div>
+                      {sprintWinner ? <div style={{ color: '#c084fc' }}>{sprintWinner.winners.map(w => w.user.nickname).join(', ')} (P{sprintWinner.winners[0].pos}) - ${sprintWinner.prize}</div> : <span style={{ color: '#64748b' }}>{hasResult ? 'No winner' : 'Pending'}</span>}
+                    </div>;
+                  })}
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '12px', padding: '20px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0' }}>📊 Season Balance Summary</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={s.table}>
+                    <thead>
+                      <tr>
+                        <th style={s.th}>Poolie</th>
+                        <th style={s.th}>Season</th>
+                        <th style={s.th}>Weekly</th>
+                        <th style={s.th}>Sprint</th>
+                        <th style={s.th}>Investment</th>
+                        <th style={s.th}>Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedUsers.map(user => {
+                        const e = userEarnings[user.id];
+                        return <tr key={user.id}>
+                          <td style={s.td}><strong>{user.nickname}</strong></td>
+                          <td style={s.td}>${e.season.toLocaleString()}</td>
+                          <td style={s.td}>${e.weekly.toLocaleString()}</td>
+                          <td style={s.td}>${e.sprint.toLocaleString()}</td>
+                          <td style={s.td}>-$1,000</td>
+                          <td style={{ ...s.td, fontWeight: '700', color: e.total >= 0 ? '#4ade80' : '#f87171' }}>{e.total >= 0 ? '+' : ''}${e.total.toLocaleString()}</td>
+                        </tr>;
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>);
+          })()}
+        </div>}
+
         {activeTab === 'drivers' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏎️ 2026 Drivers</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{drivers2026.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{d.Driver.driverId}</span><div><span style={{ fontWeight: '700' }}>{name} {isOOTT(name) && '⭐'}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{d.Constructors[0].name}</p></div></div>{isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}</div>; })}</div></div>}
         {activeTab === 'teams' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 2026 Teams</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>{constructors2026.map(c => { const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === c.Constructor.name); return <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}><span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{c.position}</span><div><span style={{ fontWeight: '700', fontSize: '16px' }}>{c.Constructor.name}</span>{isOOT6(c.Constructor.name) && <span style={{ marginLeft: '8px', ...s.badge, background: '#7c3aed' }}>OOT6 2x</span>}<p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>Engine: {c.engine}</p></div></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>{teamDrivers.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '28px', height: '28px', background: '#475569', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>{d.Driver.driverId}</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{name}</span>{isOOTT(name) && <span>⭐</span>}</div>; })}</div></div>; })}</div></div>}
       </main>
