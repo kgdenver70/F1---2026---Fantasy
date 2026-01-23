@@ -186,6 +186,7 @@ function App() {
   const getUserPick = (raceId) => currentUser ? userPicks[currentUser.id + '-' + raceId] : null;
 
   const calculateUserPoints = (userId) => {
+    const pointsTable = { 1: 27, 2: 21, 3: 20, 4: 19, 5: 18, 6: 17, 7: 16, 8: 15, 9: 14, 10: 13, 11: 12, 12: 11, 13: 10, 14: 9, 15: 8, 16: 7, 17: 6, 18: 5, 19: 4, 20: 3, 21: 2, 22: 1 };
     let total = 0;
     Object.entries(userPicks).forEach(([key, pick]) => {
       if (!key.startsWith(userId + '-')) return;
@@ -195,9 +196,8 @@ function App() {
       if (pick.picks && pick.picks.drivers) {
         pick.picks.drivers.forEach(driverId => {
           const driverResult = result.driverPositions && result.driverPositions[driverId];
-          if (driverResult) {
-            let pts = Math.max(0, 23 - driverResult.position);
-            if (driverResult.position === 1) pts = 25;
+          if (driverResult && driverResult.position > 0) {
+            let pts = pointsTable[driverResult.position] || 0;
             const driver = drivers2026.find(d => d.Driver.driverId === driverId);
             if (driver && isOOTT(driver.Driver.givenName + ' ' + driver.Driver.familyName)) pts *= 2;
             total += pts;
@@ -205,12 +205,17 @@ function App() {
         });
       }
       if (pick.picks && pick.picks.constructor) {
-        const constructorResult = result.constructorPositions && result.constructorPositions[pick.picks.constructor];
-        if (constructorResult) {
-          let pts = Math.max(0, 12 - constructorResult.position);
-          if (isOOT6(pick.picks.constructor)) pts *= 2;
-          total += Math.round(pts * 0.5);
-        }
+        const constructorName = pick.picks.constructor;
+        const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === constructorName);
+        let constructorPts = 0;
+        teamDrivers.forEach(d => {
+          const driverResult = result.driverPositions && result.driverPositions[d.Driver.driverId];
+          if (driverResult && driverResult.position > 0) {
+            constructorPts += pointsTable[driverResult.position] || 0;
+          }
+        });
+        if (!isOOT6(constructorName)) constructorPts = Math.round(constructorPts / 2);
+        total += constructorPts;
       }
     });
     return total;
@@ -281,7 +286,7 @@ function App() {
           <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 Enter Race Results</h2>
           {!selectedRaceForResult ? <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => { const hasResult = raceResults[race.id]; return <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: hasResult ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}><div><span style={{ fontWeight: '700' }}>R{i+1}: {race.name}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.pickType}</p>{hasResult && <span style={{ color: '#4ade80', fontSize: '13px' }}>✓ Results entered</span>}</div><button onClick={() => setSelectedRaceForResult(race)} style={{ ...s.btn, ...(hasResult ? s.btnGreen : s.btnBlue), padding: '8px 16px' }}>{hasResult ? 'Edit' : 'Enter'} Results</button></div>; })}</div> : <div>
             <h3 style={{ margin: '0 0 16px 0' }}>{selectedRaceForResult.name} - {selectedRaceForResult.pickType}</h3>
-            {selectedRaceForResult.pickType.includes('Constructor') ? <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter constructor positions (1-11):</p><div style={s.grid}>{constructors2026.map(c => <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{c.Constructor.name}</label><input type="number" min="1" max="11" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].constructorPositions && raceResults[selectedRaceForResult.id].constructorPositions[c.Constructor.name] && raceResults[selectedRaceForResult.id].constructorPositions[c.Constructor.name].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { constructorPositions: {} }; current.constructorPositions = current.constructorPositions || {}; current.constructorPositions[c.Constructor.name] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={{ ...s.input, marginTop: '8px' }} /></div>)}</div></div> : <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter driver positions (1-22, 0=DNF):</p><div style={s.grid}>{drivers2026.map(d => <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{d.Driver.givenName} {d.Driver.familyName}</label><p style={{ color: '#94a3b8', fontSize: '12px', margin: '2px 0 8px 0' }}>{d.Constructors[0].name}</p><input type="number" min="0" max="22" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].driverPositions && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId] && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { driverPositions: {} }; current.driverPositions = current.driverPositions || {}; current.driverPositions[d.Driver.driverId] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={s.input} /></div>)}</div></div>}
+            {selectedRaceForResult.pickType.includes('Constructor') ? <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter driver positions (1-22, 0=DNF). Constructor points will be calculated from their drivers.</p><div style={s.grid}>{drivers2026.map(d => <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{d.Driver.givenName} {d.Driver.familyName}</label><p style={{ color: '#94a3b8', fontSize: '12px', margin: '2px 0 8px 0' }}>{d.Constructors[0].name}</p><input type="number" min="0" max="22" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].driverPositions && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId] && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { driverPositions: {} }; current.driverPositions = current.driverPositions || {}; current.driverPositions[d.Driver.driverId] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={s.input} /></div>)}</div></div> : <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter driver positions (1-22, 0=DNF):</p><div style={s.grid}>{drivers2026.map(d => <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{d.Driver.givenName} {d.Driver.familyName}</label><p style={{ color: '#94a3b8', fontSize: '12px', margin: '2px 0 8px 0' }}>{d.Constructors[0].name}</p><input type="number" min="0" max="22" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].driverPositions && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId] && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { driverPositions: {} }; current.driverPositions = current.driverPositions || {}; current.driverPositions[d.Driver.driverId] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={s.input} /></div>)}</div></div>}
             <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}><button onClick={() => { saveRaceResult(selectedRaceForResult.id, raceResults[selectedRaceForResult.id]); setSelectedRaceForResult(null); alert('Results saved!'); }} style={{ ...s.btn, ...s.btnGreen }}>Save Results</button><button onClick={() => setSelectedRaceForResult(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div>
           </div>}
         </div>}
