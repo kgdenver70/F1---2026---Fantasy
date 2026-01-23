@@ -7,7 +7,6 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 </head>
@@ -16,13 +15,6 @@
   <script type="text/babel">
 const { useState, useEffect } = React;
 
-
-const firebaseConfig = {// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDWVpB2LwzMlCB6EwKV2pSf0PKdzpEiw-A",
   authDomain: "f1-fantasy-2026.firebaseapp.com",
@@ -33,18 +25,12 @@ const firebaseConfig = {
   appId: "1:164030081474:web:429e56c2961d20d0a00e5b"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-  
-};
-
-// Initialize Firebase
 let db = null;
 try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.database();
 } catch (e) {
-  console.log("Firebase not configured yet");
+  console.log("Firebase error:", e);
 }
 
 function App() {
@@ -116,9 +102,7 @@ function App() {
 
   const oottDrivers = ['Colapinto', 'Bearman', 'Ocon', 'Stroll', 'Bortoleto', 'Hulkenberg', 'Lawson', 'Lindblad', 'Bottas', 'Perez', 'Hadjar', 'Gasly'];
   const oot6Constructors = ['Aston Martin', 'Haas', 'Audi', 'Cadillac', 'Alpine'];
-
-  // ⚠️ CHANGE THIS PASSWORD!
-  const ADMIN_PASSWORD = "your_secret_password";
+  const ADMIN_PASSWORD = "f1admin2026";
 
   const [activeTab, setActiveTab] = useState('standings');
   const [currentUser, setCurrentUser] = useState(null);
@@ -141,108 +125,37 @@ function App() {
   const [editingUser, setEditingUser] = useState(null);
   const [selectedRaceForResult, setSelectedRaceForResult] = useState(null);
 
-  // Load data from Firebase
   useEffect(() => {
     if (!db) {
-      // No Firebase - use default data
-      setUsers([
-        { id: '1', email: 'demo1@email.com', password: 'password', nickname: 'SpeedDemon', points: 0, picks: 0 },
-        { id: '2', email: 'demo2@email.com', password: 'password', nickname: 'F1Fanatic', points: 0, picks: 0 },
-      ]);
+      setUsers([{ id: '1', email: 'demo1@email.com', password: 'password', nickname: 'SpeedDemon', points: 0, picks: 0 }, { id: '2', email: 'demo2@email.com', password: 'password', nickname: 'F1Fanatic', points: 0, picks: 0 }]);
       setLoading(false);
       return;
     }
-
-    // Load users
     db.ref('users').on('value', (snapshot) => {
       const data = snapshot.val();
-      if (data) {
-        setUsers(Object.values(data));
-      } else {
-        // Initialize with demo users
-        const demoUsers = [
-          { id: '1', email: 'demo1@email.com', password: 'password', nickname: 'SpeedDemon', points: 0, picks: 0 },
-          { id: '2', email: 'demo2@email.com', password: 'password', nickname: 'F1Fanatic', points: 0, picks: 0 },
-        ];
+      if (data) { setUsers(Object.values(data)); } else {
+        const demoUsers = [{ id: '1', email: 'demo1@email.com', password: 'password', nickname: 'SpeedDemon', points: 0, picks: 0 }, { id: '2', email: 'demo2@email.com', password: 'password', nickname: 'F1Fanatic', points: 0, picks: 0 }];
         demoUsers.forEach(u => db.ref('users/' + u.id).set(u));
         setUsers(demoUsers);
       }
       setLoading(false);
     });
-
-    // Load picks
-    db.ref('picks').on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) setUserPicks(data);
-    });
-
-    // Load race results
-    db.ref('raceResults').on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) setRaceResults(data);
-    });
+    db.ref('picks').on('value', (snapshot) => { const data = snapshot.val(); if (data) setUserPicks(data); });
+    db.ref('raceResults').on('value', (snapshot) => { const data = snapshot.val(); if (data) setRaceResults(data); });
   }, []);
 
-  // Save to Firebase helpers
-  const saveUser = (user) => {
-    if (db) {
-      db.ref('users/' + user.id).set(user);
-    }
-    setUsers(users.map(u => u.id === user.id ? user : u));
-  };
-
-  const addUser = (user) => {
-    if (db) {
-      db.ref('users/' + user.id).set(user);
-    }
-    setUsers([...users, user]);
-  };
-
-  const deleteUser = (userId) => {
-    if (db) {
-      db.ref('users/' + userId).remove();
-    }
-    setUsers(users.filter(u => u.id !== userId));
-  };
-
-  const savePicks = (key, pickData) => {
-    if (db) {
-      db.ref('picks/' + key).set(pickData);
-    }
-    setUserPicks({ ...userPicks, [key]: pickData });
-  };
-
-  const saveRaceResult = (raceId, result) => {
-    if (db) {
-      db.ref('raceResults/' + raceId).set(result);
-    }
-    setRaceResults({ ...raceResults, [raceId]: result });
-  };
-
+  const saveUser = (user) => { if (db) db.ref('users/' + user.id).set(user); setUsers(users.map(u => u.id === user.id ? user : u)); };
+  const addUser = (user) => { if (db) db.ref('users/' + user.id).set(user); setUsers([...users, user]); };
+  const deleteUser = (userId) => { if (db) db.ref('users/' + userId).remove(); setUsers(users.filter(u => u.id !== userId)); };
+  const savePicks = (key, pickData) => { if (db) db.ref('picks/' + key).set(pickData); setUserPicks({ ...userPicks, [key]: pickData }); };
+  const saveRaceResult = (raceId, result) => { if (db) db.ref('raceResults/' + raceId).set(result); setRaceResults({ ...raceResults, [raceId]: result }); };
   const isOOTT = (name) => oottDrivers.some(d => name.includes(d));
   const isOOT6 = (name) => oot6Constructors.includes(name);
 
   const handleLogin = () => {
-    // Check admin login
-    if (email === 'admin' && password === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      setShowAuth(false);
-      setAuthError('');
-      setEmail('');
-      setPassword('');
-      return;
-    }
-
+    if (email === 'admin' && password === ADMIN_PASSWORD) { setIsAdmin(true); setShowAuth(false); setAuthError(''); setEmail(''); setPassword(''); return; }
     const user = users.find(u => u.email === email && u.password === password);
-    if (user) {
-      setCurrentUser(user);
-      setShowAuth(false);
-      setAuthError('');
-      setEmail('');
-      setPassword('');
-    } else {
-      setAuthError('Invalid email or password');
-    }
+    if (user) { setCurrentUser(user); setShowAuth(false); setAuthError(''); setEmail(''); setPassword(''); } else { setAuthError('Invalid email or password'); }
   };
 
   const handleRegister = () => {
@@ -251,55 +164,26 @@ function App() {
     if (!password || password.length < 6) { setAuthError('Password must be at least 6 characters'); return; }
     if (password !== confirmPassword) { setAuthError('Passwords do not match'); return; }
     if (users.find(u => u.email === email)) { setAuthError('Email already registered'); return; }
-    
     const newUser = { id: Date.now().toString(), email, password, nickname, points: 0, picks: 0 };
-    addUser(newUser);
-    setCurrentUser(newUser);
-    setShowAuth(false);
-    setAuthError('');
+    addUser(newUser); setCurrentUser(newUser); setShowAuth(false); setAuthError('');
     setEmail(''); setPassword(''); setConfirmPassword(''); setNickname('');
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setIsAdmin(false);
-    setShowAuth(true);
-    setActiveTab('standings');
-  };
+  const handleLogout = () => { setCurrentUser(null); setIsAdmin(false); setShowAuth(true); setActiveTab('standings'); };
 
   const savePick = () => {
     if (!selectedRace || !currentUser) return;
     const key = currentUser.id + '-' + selectedRace.id;
-    const pickData = { 
-      oderId: currentUser.id,
-      raceId: selectedRace.id,
-      picks: selectedRace.pickType.includes('Constructor') ? { constructor: selectedConstructor } : { drivers: [...selectedDrivers] },
-      timestamp: Date.now()
-    };
+    const pickData = { oderId: currentUser.id, raceId: selectedRace.id, picks: selectedRace.pickType.includes('Constructor') ? { constructor: selectedConstructor } : { drivers: [...selectedDrivers] }, timestamp: Date.now() };
     savePicks(key, pickData);
-    
     const updatedUser = { ...currentUser, picks: (currentUser.picks || 0) + 1 };
-    saveUser(updatedUser);
-    setCurrentUser(updatedUser);
-    
-    setSelectedRace(null);
-    setSelectedDrivers([]);
-    setSelectedConstructor('');
+    saveUser(updatedUser); setCurrentUser(updatedUser);
+    setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor('');
   };
 
-  const isDriverPicked = (id) => {
-    if (!currentUser) return false;
-    return Object.values(userPicks).some(p => 
-      p.oderId === currentUser.id && p.picks && p.picks.drivers && p.picks.drivers.includes(id)
-    );
-  };
+  const isDriverPicked = (id) => currentUser && Object.values(userPicks).some(p => p.oderId === currentUser.id && p.picks && p.picks.drivers && p.picks.drivers.includes(id));
+  const getUserPick = (raceId) => currentUser ? userPicks[currentUser.id + '-' + raceId] : null;
 
-  const getUserPick = (raceId) => {
-    if (!currentUser) return null;
-    return userPicks[currentUser.id + '-' + raceId];
-  };
-
-  // Calculate points for a user based on their picks and race results
   const calculateUserPoints = (userId) => {
     let total = 0;
     Object.entries(userPicks).forEach(([key, pick]) => {
@@ -307,52 +191,38 @@ function App() {
       const raceId = key.split('-')[1];
       const result = raceResults[raceId];
       if (!result) return;
-      
-      if (pick.picks.drivers) {
+      if (pick.picks && pick.picks.drivers) {
         pick.picks.drivers.forEach(driverId => {
           const driverResult = result.driverPositions && result.driverPositions[driverId];
           if (driverResult) {
             let pts = Math.max(0, 23 - driverResult.position);
             if (driverResult.position === 1) pts = 25;
             const driver = drivers2026.find(d => d.Driver.driverId === driverId);
-            if (driver && isOOTT(driver.Driver.givenName + ' ' + driver.Driver.familyName)) {
-              pts *= 2;
-            }
+            if (driver && isOOTT(driver.Driver.givenName + ' ' + driver.Driver.familyName)) pts *= 2;
             total += pts;
           }
         });
       }
-      if (pick.picks.constructor) {
+      if (pick.picks && pick.picks.constructor) {
         const constructorResult = result.constructorPositions && result.constructorPositions[pick.picks.constructor];
         if (constructorResult) {
           let pts = Math.max(0, 12 - constructorResult.position);
           if (isOOT6(pick.picks.constructor)) pts *= 2;
-          pts = Math.round(pts * 0.5); // Sprint weekend 50%
-          total += pts;
+          total += Math.round(pts * 0.5);
         }
       }
     });
     return total;
   };
 
-  // Admin: Recalculate all user points
-  const recalculateAllPoints = () => {
-    users.forEach(user => {
-      const points = calculateUserPoints(user.id);
-      saveUser({ ...user, points });
-    });
-    alert('All points recalculated!');
-  };
+  const recalculateAllPoints = () => { users.forEach(user => { const points = calculateUserPoints(user.id); saveUser({ ...user, points }); }); alert('All points recalculated!'); };
 
   const s = {
     container: { minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: 'white', fontFamily: 'system-ui, sans-serif' },
     card: { background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(100, 116, 139, 0.3)', marginBottom: '16px' },
     btn: { padding: '12px 24px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '14px' },
-    btnRed: { background: '#dc2626', color: 'white' },
-    btnGray: { background: 'rgba(71, 85, 105, 0.5)', color: '#cbd5e1' },
-    btnGreen: { background: '#16a34a', color: 'white' },
-    btnBlue: { background: '#2563eb', color: 'white' },
-    btnOrange: { background: '#ea580c', color: 'white' },
+    btnRed: { background: '#dc2626', color: 'white' }, btnGray: { background: 'rgba(71, 85, 105, 0.5)', color: '#cbd5e1' },
+    btnGreen: { background: '#16a34a', color: 'white' }, btnBlue: { background: '#2563eb', color: 'white' }, btnOrange: { background: '#ea580c', color: 'white' },
     input: { padding: '14px', background: 'rgba(51, 65, 85, 0.5)', border: '1px solid #475569', borderRadius: '12px', color: 'white', fontSize: '16px', width: '100%', boxSizing: 'border-box', outline: 'none' },
     header: { background: 'linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ea580c 100%)', padding: '16px' },
     nav: { background: 'rgba(30, 41, 59, 0.9)', padding: '12px 16px', borderBottom: '1px solid rgba(71, 85, 105, 0.5)', position: 'sticky', top: 0, zIndex: 10 },
@@ -363,480 +233,74 @@ function App() {
     td: { padding: '12px', borderBottom: '1px solid rgba(100, 116, 139, 0.2)' }
   };
 
-  if (loading) {
-    return (
-      <div style={{ ...s.container, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏎️</div>
-          <p>Loading...</p>
+  if (loading) return <div style={{ ...s.container, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ textAlign: 'center' }}><div style={{ fontSize: '48px', marginBottom: '16px' }}>🏎️</div><p>Loading...</p></div></div>;
+
+  if (showAuth) return (
+    <div style={{ ...s.container, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ ...s.card, maxWidth: '400px', width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ display: 'inline-block', padding: '16px 28px', background: 'linear-gradient(135deg, #dc2626, #ea580c)', borderRadius: '16px', marginBottom: '16px' }}><span style={{ fontSize: '32px', fontWeight: '900' }}>F1</span></div>
+          <h1 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0' }}>FANTASY LEAGUE</h1>
+          <p style={{ color: '#f87171', fontWeight: '600', margin: 0 }}>2026 SEASON</p>
+          <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '8px' }}>22 Drivers • 11 Teams • 24 Races</p>
         </div>
-      </div>
-    );
-  }
-
-  if (showAuth) {
-    return (
-      <div style={{ ...s.container, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <div style={{ ...s.card, maxWidth: '400px', width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <div style={{ display: 'inline-block', padding: '16px 28px', background: 'linear-gradient(135deg, #dc2626, #ea580c)', borderRadius: '16px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '32px', fontWeight: '900' }}>F1</span>
-            </div>
-            <h1 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0' }}>FANTASY LEAGUE</h1>
-            <p style={{ color: '#f87171', fontWeight: '600', margin: 0 }}>2026 SEASON</p>
-            <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '8px' }}>22 Drivers • 11 Teams • 24 Races</p>
-          </div>
-          
-          <div style={{ display: 'flex', background: 'rgba(51, 65, 85, 0.5)', borderRadius: '12px', padding: '4px', marginBottom: '24px' }}>
-            <button onClick={() => { setAuthMode('login'); setAuthError(''); }} style={{ ...s.btn, flex: 1, background: authMode === 'login' ? '#dc2626' : 'transparent', color: authMode === 'login' ? 'white' : '#94a3b8' }}>Login</button>
-            <button onClick={() => { setAuthMode('register'); setAuthError(''); }} style={{ ...s.btn, flex: 1, background: authMode === 'register' ? '#dc2626' : 'transparent', color: authMode === 'register' ? 'white' : '#94a3b8' }}>Register</button>
-          </div>
-
-          {authError && <div style={{ background: 'rgba(127, 29, 29, 0.5)', border: '1px solid #dc2626', color: '#fca5a5', padding: '12px', borderRadius: '12px', marginBottom: '16px', fontSize: '14px' }}>{authError}</div>}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {authMode === 'register' && <input type="text" placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} style={s.input} />}
-            <input type="text" placeholder={authMode === 'login' ? "Email or 'admin'" : "Email"} value={email} onChange={e => setEmail(e.target.value)} style={s.input} />
-            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={s.input} />
-            {authMode === 'register' && <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={s.input} />}
-            <button onClick={authMode === 'login' ? handleLogin : handleRegister} style={{ ...s.btn, ...s.btnRed, width: '100%', padding: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>{authMode === 'login' ? 'Login' : 'Create Account'}</button>
-          </div>
-
-          {authMode === 'login' && (
-            <div style={{ marginTop: '24px', textAlign: 'center', background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}>
-              <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 8px 0' }}>Demo: demo1@email.com / password</p>
-              <p style={{ color: '#64748b', fontSize: '12px', margin: 0 }}>Admin: admin / [admin password]</p>
-            </div>
-          )}
+        <div style={{ display: 'flex', background: 'rgba(51, 65, 85, 0.5)', borderRadius: '12px', padding: '4px', marginBottom: '24px' }}>
+          <button onClick={() => { setAuthMode('login'); setAuthError(''); }} style={{ ...s.btn, flex: 1, background: authMode === 'login' ? '#dc2626' : 'transparent', color: authMode === 'login' ? 'white' : '#94a3b8' }}>Login</button>
+          <button onClick={() => { setAuthMode('register'); setAuthError(''); }} style={{ ...s.btn, flex: 1, background: authMode === 'register' ? '#dc2626' : 'transparent', color: authMode === 'register' ? 'white' : '#94a3b8' }}>Register</button>
         </div>
+        {authError && <div style={{ background: 'rgba(127, 29, 29, 0.5)', border: '1px solid #dc2626', color: '#fca5a5', padding: '12px', borderRadius: '12px', marginBottom: '16px', fontSize: '14px' }}>{authError}</div>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {authMode === 'register' && <input type="text" placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} style={s.input} />}
+          <input type="text" placeholder={authMode === 'login' ? "Email or 'admin'" : "Email"} value={email} onChange={e => setEmail(e.target.value)} style={s.input} />
+          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={s.input} />
+          {authMode === 'register' && <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={s.input} />}
+          <button onClick={authMode === 'login' ? handleLogin : handleRegister} style={{ ...s.btn, ...s.btnRed, width: '100%', padding: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>{authMode === 'login' ? 'Login' : 'Create Account'}</button>
+        </div>
+        {authMode === 'login' && <div style={{ marginTop: '24px', textAlign: 'center', background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}><p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 8px 0' }}>Demo: demo1@email.com / password</p><p style={{ color: '#64748b', fontSize: '12px', margin: 0 }}>Admin: admin / f1admin2026</p></div>}
       </div>
-    );
-  }
+    </div>
+  );
 
-  // ADMIN PANEL
-  if (isAdmin) {
-    return (
-      <div style={s.container}>
-        <header style={{ ...s.header, background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>⚙️</div>
-              <div>
-                <h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>ADMIN PANEL</h1>
-                <p style={{ fontSize: '12px', color: '#e9d5ff', margin: 0 }}>F1 Fantasy League 2026</p>
-              </div>
-            </div>
-            <button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white' }}>Logout</button>
-          </div>
-        </header>
-
-        <nav style={s.nav}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px' }}>
-            {['users', 'results', 'picks'].map(tab => (
-              <button key={tab} onClick={() => setAdminTab(tab)} style={{ ...s.btn, ...(adminTab === tab ? s.btnBlue : s.btnGray), textTransform: 'capitalize' }}>{tab === 'results' ? 'Race Results' : tab === 'picks' ? 'View Picks' : tab}</button>
-            ))}
-          </div>
-        </nav>
-
-        <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
-          {/* USERS TAB */}
-          {adminTab === 'users' && (
-            <div style={s.card}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: '700', margin: 0 }}>👥 Manage Users</h2>
-                <button onClick={recalculateAllPoints} style={{ ...s.btn, ...s.btnOrange }}>Recalculate All Points</button>
-              </div>
-
-              {editingUser && (
-                <div style={{ background: 'rgba(37, 99, 235, 0.1)', border: '1px solid #2563eb', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-                  <h3 style={{ margin: '0 0 16px 0' }}>Edit User: {editingUser.nickname}</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                    <div>
-                      <label style={{ fontSize: '12px', color: '#94a3b8' }}>Nickname</label>
-                      <input value={editingUser.nickname} onChange={e => setEditingUser({...editingUser, nickname: e.target.value})} style={s.input} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '12px', color: '#94a3b8' }}>Email</label>
-                      <input value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} style={s.input} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '12px', color: '#94a3b8' }}>Points</label>
-                      <input type="number" value={editingUser.points} onChange={e => setEditingUser({...editingUser, points: parseInt(e.target.value) || 0})} style={s.input} />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                    <button onClick={() => { saveUser(editingUser); setEditingUser(null); }} style={{ ...s.btn, ...s.btnGreen }}>Save</button>
-                    <button onClick={() => setEditingUser(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button>
-                  </div>
-                </div>
-              )}
-
-              <table style={s.table}>
-                <thead>
-                  <tr>
-                    <th style={s.th}>Nickname</th>
-                    <th style={s.th}>Email</th>
-                    <th style={s.th}>Points</th>
-                    <th style={s.th}>Picks</th>
-                    <th style={s.th}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.sort((a,b) => (b.points || 0) - (a.points || 0)).map(user => (
-                    <tr key={user.id}>
-                      <td style={s.td}><strong>{user.nickname}</strong></td>
-                      <td style={s.td}>{user.email}</td>
-                      <td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td>
-                      <td style={s.td}>{user.picks || 0}/24</td>
-                      <td style={s.td}>
-                        <button onClick={() => setEditingUser({...user})} style={{ ...s.btn, ...s.btnBlue, padding: '6px 12px', marginRight: '8px' }}>Edit</button>
-                        <button onClick={() => { if(confirm('Delete user ' + user.nickname + '?')) deleteUser(user.id); }} style={{ ...s.btn, ...s.btnRed, padding: '6px 12px' }}>Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* RACE RESULTS TAB */}
-          {adminTab === 'results' && (
-            <div style={s.card}>
-              <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 Enter Race Results</h2>
-              
-              {!selectedRaceForResult ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {raceSchedule.map((race, i) => {
-                    const hasResult = raceResults[race.id];
-                    return (
-                      <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: hasResult ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}>
-                        <div>
-                          <span style={{ fontWeight: '700' }}>R{i+1}: {race.name}</span>
-                          <p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.pickType}</p>
-                          {hasResult && <span style={{ color: '#4ade80', fontSize: '13px' }}>✓ Results entered</span>}
-                        </div>
-                        <button onClick={() => setSelectedRaceForResult(race)} style={{ ...s.btn, ...(hasResult ? s.btnGreen : s.btnBlue), padding: '8px 16px' }}>{hasResult ? 'Edit' : 'Enter'} Results</button>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div>
-                  <h3 style={{ margin: '0 0 16px 0' }}>{selectedRaceForResult.name} - {selectedRaceForResult.pickType}</h3>
-                  
-                  {selectedRaceForResult.pickType.includes('Constructor') ? (
-                    <div>
-                      <p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter constructor finishing positions (1-11):</p>
-                      <div style={s.grid}>
-                        {constructors2026.map(c => (
-                          <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}>
-                            <label style={{ fontWeight: '600' }}>{c.Constructor.name}</label>
-                            <input 
-                              type="number" 
-                              min="1" 
-                              max="11" 
-                              placeholder="Pos"
-                              value={(raceResults[selectedRaceForResult.id]?.constructorPositions?.[c.Constructor.name]?.position) || ''}
-                              onChange={e => {
-                                const pos = parseInt(e.target.value) || 0;
-                                const current = raceResults[selectedRaceForResult.id] || { constructorPositions: {} };
-                                current.constructorPositions = current.constructorPositions || {};
-                                current.constructorPositions[c.Constructor.name] = { position: pos };
-                                setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current });
-                              }}
-                              style={{ ...s.input, marginTop: '8px' }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter driver finishing positions (1-22, 0 for DNF):</p>
-                      <div style={s.grid}>
-                        {drivers2026.map(d => (
-                          <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}>
-                            <label style={{ fontWeight: '600' }}>{d.Driver.givenName} {d.Driver.familyName}</label>
-                            <p style={{ color: '#94a3b8', fontSize: '12px', margin: '2px 0 8px 0' }}>{d.Constructors[0].name}</p>
-                            <input 
-                              type="number" 
-                              min="0" 
-                              max="22" 
-                              placeholder="Pos"
-                              value={(raceResults[selectedRaceForResult.id]?.driverPositions?.[d.Driver.driverId]?.position) || ''}
-                              onChange={e => {
-                                const pos = parseInt(e.target.value) || 0;
-                                const current = raceResults[selectedRaceForResult.id] || { driverPositions: {} };
-                                current.driverPositions = current.driverPositions || {};
-                                current.driverPositions[d.Driver.driverId] = { position: pos };
-                                setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current });
-                              }}
-                              style={s.input}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                    <button onClick={() => { saveRaceResult(selectedRaceForResult.id, raceResults[selectedRaceForResult.id]); setSelectedRaceForResult(null); alert('Results saved!'); }} style={{ ...s.btn, ...s.btnGreen }}>Save Results</button>
-                    <button onClick={() => setSelectedRaceForResult(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* VIEW PICKS TAB */}
-          {adminTab === 'picks' && (
-            <div style={s.card}>
-              <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 All User Picks</h2>
-              
-              {users.map(user => {
-                const userPicksList = Object.entries(userPicks).filter(([k]) => k.startsWith(user.id + '-'));
-                if (userPicksList.length === 0) return null;
-                
-                return (
-                  <div key={user.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px', marginBottom: '12px' }}>
-                    <h3 style={{ margin: '0 0 12px 0' }}>{user.nickname} <span style={{ color: '#94a3b8', fontSize: '14px' }}>({user.points || 0} pts)</span></h3>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {userPicksList.map(([key, pick]) => {
-                        const raceId = key.split('-')[1];
-                        const race = raceSchedule.find(r => r.id.toString() === raceId);
-                        return (
-                          <div key={key} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px' }}>
-                            <strong>{race?.name || 'R' + raceId}:</strong> {pick.picks?.drivers?.join(', ') || pick.picks?.constructor}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </main>
-      </div>
-    );
-  }
-
-  // REGULAR USER VIEW
-  return (
+  if (isAdmin) return (
     <div style={s.container}>
-      <header style={s.header}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div>
-            <div>
-              <h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>FANTASY LEAGUE 2026</h1>
-              <p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}>
-              <span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span>
-              <span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span>
-            </div>
-            <button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button>
-          </div>
+      <header style={{ ...s.header, background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>⚙️</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>ADMIN PANEL</h1><p style={{ fontSize: '12px', color: '#e9d5ff', margin: 0 }}>F1 Fantasy League 2026</p></div></div>
+          <button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white' }}>Logout</button>
         </div>
       </header>
-
-      <nav style={s.nav}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>
-          {['standings', 'picks', 'schedule', 'drivers', 'teams'].map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
-              {tab === 'picks' ? 'My Picks' : tab}
-            </button>
-          ))}
-        </div>
-      </nav>
-
+      <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px' }}>{['users', 'results', 'picks'].map(tab => <button key={tab} onClick={() => setAdminTab(tab)} style={{ ...s.btn, ...(adminTab === tab ? s.btnBlue : s.btnGray), textTransform: 'capitalize' }}>{tab === 'results' ? 'Race Results' : tab === 'picks' ? 'View Picks' : tab}</button>)}</div></nav>
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
-        {activeTab === 'standings' && (
-          <div style={s.card}>
-            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏆 League Standings</h2>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  <th style={s.th}>Pos</th>
-                  <th style={s.th}>Player</th>
-                  <th style={s.th}>Points</th>
-                  <th style={s.th}>Picks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.sort((a, b) => (b.points || 0) - (a.points || 0)).map((user, i) => (
-                  <tr key={user.id} style={{ background: currentUser && user.id === currentUser.id ? 'rgba(220, 38, 38, 0.1)' : 'transparent' }}>
-                    <td style={s.td}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', fontWeight: '700', background: i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#fb923c' : '#475569', color: i < 3 ? '#000' : '#fff' }}>{i + 1}</span>
-                    </td>
-                    <td style={s.td}><strong>{user.nickname}</strong>{currentUser && user.id === currentUser.id && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(220, 38, 38, 0.3)', color: '#fca5a5', padding: '2px 8px', borderRadius: '999px' }}>You</span>}</td>
-                    <td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td>
-                    <td style={s.td}>{user.picks || 0}/24</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === 'picks' && (
-          <div style={s.card}>
-            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 My Picks</h2>
-            
-            {!selectedRace ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {raceSchedule.map((race, i) => {
-                  const pick = getUserPick(race.id);
-                  return (
-                    <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: pick ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: '700', background: '#475569', padding: '3px 7px', borderRadius: '4px' }}>R{i + 1}</span>
-                          <span style={{ fontWeight: '700' }}>{race.name}</span>
-                        </div>
-                        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.location}</p>
-                        <span style={{ ...s.badge, background: race.pickType.includes('Constructor') ? 'rgba(168, 85, 247, 0.2)' : race.pickType.includes('2') ? 'rgba(251, 146, 60, 0.2)' : 'rgba(74, 222, 128, 0.2)', color: race.pickType.includes('Constructor') ? '#c084fc' : race.pickType.includes('2') ? '#fb923c' : '#4ade80' }}>{race.pickType}</span>
-                        {pick && <p style={{ color: '#4ade80', fontSize: '13px', marginTop: '6px' }}>✓ {pick.picks && pick.picks.drivers ? pick.picks.drivers.map(id => { const d = drivers2026.find(x => x.Driver.driverId === id); return d ? d.Driver.familyName : id; }).join(', ') : pick.picks && pick.picks.constructor}</p>}
-                      </div>
-                      {!pick && <button onClick={() => setSelectedRace(race)} style={{ ...s.btn, ...s.btnRed, padding: '8px 16px' }}>Pick</button>}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '20px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0' }}>{selectedRace.name}</h3>
-                <p style={{ color: '#94a3b8', margin: '0 0 20px 0' }}>{selectedRace.pickType}</p>
-
-                {selectedRace.pickType.includes('Constructor') ? (
-                  <div style={s.grid}>
-                    {constructors2026.map(c => (
-                      <button key={c.Constructor.constructorId} onClick={() => setSelectedConstructor(c.Constructor.name)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: 'pointer', border: selectedConstructor === c.Constructor.name ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: selectedConstructor === c.Constructor.name ? '#dc2626' : 'rgba(71, 85, 105, 0.3)', color: 'white' }}>
-                        <div style={{ fontWeight: '700' }}>{c.Constructor.name}</div>
-                        <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '11px', background: 'rgba(71, 85, 105, 0.5)', padding: '2px 6px', borderRadius: '4px' }}>#{c.position}</span>
-                          {isOOT6(c.Constructor.name) && <span style={{ fontSize: '11px', background: '#7c3aed', padding: '2px 6px', borderRadius: '4px' }}>2x</span>}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div>
-                    <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOTT (2x)</p>
-                    <div style={s.grid}>
-                      {drivers2026.map(d => {
-                        const id = d.Driver.driverId;
-                        const name = d.Driver.givenName + ' ' + d.Driver.familyName;
-                        const picked = isDriverPicked(id);
-                        const selected = selectedDrivers.includes(id);
-                        const max = selectedRace.pickType.includes('2') ? 2 : 1;
-                        return (
-                          <button key={id} onClick={() => { if (picked) return; if (selected) setSelectedDrivers(selectedDrivers.filter(x => x !== id)); else if (selectedDrivers.length < max) setSelectedDrivers([...selectedDrivers, id]); }} disabled={picked || (!selected && selectedDrivers.length >= max)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : 'rgba(34, 197, 94, 0.15)', color: picked ? '#64748b' : 'white', position: 'relative' }}>
-                            <div style={{ fontWeight: '600' }}>{name} {isOOTT(name) && '⭐'}</div>
-                            <div style={{ fontSize: '13px', color: selected ? '#fecaca' : '#94a3b8', marginTop: '4px' }}>{d.Constructors[0].name}</div>
-                            {picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}
-                            {selected && <div style={{ position: 'absolute', top: '8px', right: '8px', width: '22px', height: '22px', background: 'white', color: '#dc2626', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '11px' }}>{selectedDrivers.indexOf(id) + 1}</div>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-                  <button onClick={savePick} disabled={(selectedRace.pickType.includes('Constructor') && !selectedConstructor) || (!selectedRace.pickType.includes('Constructor') && !selectedDrivers.length)} style={{ ...s.btn, ...s.btnGreen, opacity: ((selectedRace.pickType.includes('Constructor') && !selectedConstructor) || (!selectedRace.pickType.includes('Constructor') && !selectedDrivers.length)) ? 0.5 : 1 }}>Confirm</button>
-                  <button onClick={() => { setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor(''); }} style={{ ...s.btn, ...s.btnGray }}>Cancel</button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'schedule' && (
-          <div style={s.card}>
-            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📅 2026 Calendar</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {raceSchedule.map((race, i) => (
-                <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <span style={{ fontSize: '20px', fontWeight: '800', color: '#475569', width: '36px' }}>{i + 1}</span>
-                    <div>
-                      <span style={{ fontWeight: '700' }}>{race.name}</span>
-                      <p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{race.location} • {race.date}</p>
-                    </div>
-                  </div>
-                  <span style={{ ...s.badge, background: race.pickType.includes('Constructor') ? '#7c3aed' : race.pickType.includes('2') ? '#ea580c' : '#16a34a' }}>{race.pickType}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'drivers' && (
-          <div style={s.card}>
-            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏎️ 2026 Drivers</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {drivers2026.map(d => {
-                const name = d.Driver.givenName + ' ' + d.Driver.familyName;
-                return (
-                  <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{d.Driver.driverId}</span>
-                      <div>
-                        <span style={{ fontWeight: '700' }}>{name} {isOOTT(name) && '⭐'}</span>
-                        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{d.Constructors[0].name}</p>
-                      </div>
-                    </div>
-                    {isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'teams' && (
-          <div style={s.card}>
-            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 2026 Teams</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {constructors2026.map(c => {
-                const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === c.Constructor.name);
-                return (
-                  <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                      <span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{c.position}</span>
-                      <div>
-                        <span style={{ fontWeight: '700', fontSize: '16px' }}>{c.Constructor.name}</span>
-                        {isOOT6(c.Constructor.name) && <span style={{ marginLeft: '8px', ...s.badge, background: '#7c3aed' }}>OOT6 2x</span>}
-                        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>Engine: {c.engine}</p>
-                      </div>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      {teamDrivers.map(d => {
-                        const name = d.Driver.givenName + ' ' + d.Driver.familyName;
-                        return (
-                          <div key={d.Driver.driverId} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ width: '28px', height: '28px', background: '#475569', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>{d.Driver.driverId}</span>
-                            <span style={{ fontWeight: '600', fontSize: '14px' }}>{name}</span>
-                            {isOOTT(name) && <span>⭐</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {adminTab === 'users' && <div style={s.card}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: 0 }}>👥 Manage Users</h2><button onClick={recalculateAllPoints} style={{ ...s.btn, ...s.btnOrange }}>Recalculate All Points</button></div>
+          {editingUser && <div style={{ background: 'rgba(37, 99, 235, 0.1)', border: '1px solid #2563eb', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}><h3 style={{ margin: '0 0 16px 0' }}>Edit User: {editingUser.nickname}</h3><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Nickname</label><input value={editingUser.nickname} onChange={e => setEditingUser({...editingUser, nickname: e.target.value})} style={s.input} /></div><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Email</label><input value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} style={s.input} /></div><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Points</label><input type="number" value={editingUser.points} onChange={e => setEditingUser({...editingUser, points: parseInt(e.target.value) || 0})} style={s.input} /></div></div><div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}><button onClick={() => { saveUser(editingUser); setEditingUser(null); }} style={{ ...s.btn, ...s.btnGreen }}>Save</button><button onClick={() => setEditingUser(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div></div>}
+          <table style={s.table}><thead><tr><th style={s.th}>Nickname</th><th style={s.th}>Email</th><th style={s.th}>Points</th><th style={s.th}>Picks</th><th style={s.th}>Actions</th></tr></thead><tbody>{users.sort((a,b) => (b.points || 0) - (a.points || 0)).map(user => <tr key={user.id}><td style={s.td}><strong>{user.nickname}</strong></td><td style={s.td}>{user.email}</td><td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td><td style={s.td}>{user.picks || 0}/24</td><td style={s.td}><button onClick={() => setEditingUser({...user})} style={{ ...s.btn, ...s.btnBlue, padding: '6px 12px', marginRight: '8px' }}>Edit</button><button onClick={() => { if(window.confirm('Delete user ' + user.nickname + '?')) deleteUser(user.id); }} style={{ ...s.btn, ...s.btnRed, padding: '6px 12px' }}>Delete</button></td></tr>)}</tbody></table>
+        </div>}
+        {adminTab === 'results' && <div style={s.card}>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 Enter Race Results</h2>
+          {!selectedRaceForResult ? <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => { const hasResult = raceResults[race.id]; return <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: hasResult ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}><div><span style={{ fontWeight: '700' }}>R{i+1}: {race.name}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.pickType}</p>{hasResult && <span style={{ color: '#4ade80', fontSize: '13px' }}>✓ Results entered</span>}</div><button onClick={() => setSelectedRaceForResult(race)} style={{ ...s.btn, ...(hasResult ? s.btnGreen : s.btnBlue), padding: '8px 16px' }}>{hasResult ? 'Edit' : 'Enter'} Results</button></div>; })}</div> : <div>
+            <h3 style={{ margin: '0 0 16px 0' }}>{selectedRaceForResult.name} - {selectedRaceForResult.pickType}</h3>
+            {selectedRaceForResult.pickType.includes('Constructor') ? <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter constructor positions (1-11):</p><div style={s.grid}>{constructors2026.map(c => <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{c.Constructor.name}</label><input type="number" min="1" max="11" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].constructorPositions && raceResults[selectedRaceForResult.id].constructorPositions[c.Constructor.name] && raceResults[selectedRaceForResult.id].constructorPositions[c.Constructor.name].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { constructorPositions: {} }; current.constructorPositions = current.constructorPositions || {}; current.constructorPositions[c.Constructor.name] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={{ ...s.input, marginTop: '8px' }} /></div>)}</div></div> : <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter driver positions (1-22, 0=DNF):</p><div style={s.grid}>{drivers2026.map(d => <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{d.Driver.givenName} {d.Driver.familyName}</label><p style={{ color: '#94a3b8', fontSize: '12px', margin: '2px 0 8px 0' }}>{d.Constructors[0].name}</p><input type="number" min="0" max="22" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].driverPositions && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId] && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { driverPositions: {} }; current.driverPositions = current.driverPositions || {}; current.driverPositions[d.Driver.driverId] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={s.input} /></div>)}</div></div>}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}><button onClick={() => { saveRaceResult(selectedRaceForResult.id, raceResults[selectedRaceForResult.id]); setSelectedRaceForResult(null); alert('Results saved!'); }} style={{ ...s.btn, ...s.btnGreen }}>Save Results</button><button onClick={() => setSelectedRaceForResult(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div>
+          </div>}
+        </div>}
+        {adminTab === 'picks' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 All User Picks</h2>{users.map(user => { const userPicksList = Object.entries(userPicks).filter(([k]) => k.startsWith(user.id + '-')); if (userPicksList.length === 0) return null; return <div key={user.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px', marginBottom: '12px' }}><h3 style={{ margin: '0 0 12px 0' }}>{user.nickname} <span style={{ color: '#94a3b8', fontSize: '14px' }}>({user.points || 0} pts)</span></h3><div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>{userPicksList.map(([key, pick]) => { const raceId = key.split('-')[1]; const race = raceSchedule.find(r => r.id.toString() === raceId); return <div key={key} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px' }}><strong>{race ? race.name : 'R' + raceId}:</strong> {pick.picks && pick.picks.drivers ? pick.picks.drivers.join(', ') : (pick.picks && pick.picks.constructor)}</div>; })}</div></div>; })}</div>}
       </main>
+    </div>
+  );
 
-      <footer style={{ background: 'rgba(30, 41, 59, 0.5)', borderTop: '1px solid rgba(71, 85, 105, 0.3)', padding: '20px', marginTop: '20px', textAlign: 'center' }}>
-        <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>F1 Fantasy League • 2026 Season</p>
-      </footer>
+  return (
+    <div style={s.container}>
+      <header style={s.header}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>FANTASY LEAGUE 2026</h1><p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p></div></div><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}><span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span><span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span></div><button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button></div></div></header>
+      <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>{['standings', 'picks', 'schedule', 'drivers', 'teams'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{tab === 'picks' ? 'My Picks' : tab}</button>)}</div></nav>
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
+        {activeTab === 'standings' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏆 League Standings</h2><table style={s.table}><thead><tr><th style={s.th}>Pos</th><th style={s.th}>Player</th><th style={s.th}>Points</th><th style={s.th}>Picks</th></tr></thead><tbody>{users.sort((a, b) => (b.points || 0) - (a.points || 0)).map((user, i) => <tr key={user.id} style={{ background: currentUser && user.id === currentUser.id ? 'rgba(220, 38, 38, 0.1)' : 'transparent' }}><td style={s.td}><span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', fontWeight: '700', background: i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#fb923c' : '#475569', color: i < 3 ? '#000' : '#fff' }}>{i + 1}</span></td><td style={s.td}><strong>{user.nickname}</strong>{currentUser && user.id === currentUser.id && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(220, 38, 38, 0.3)', color: '#fca5a5', padding: '2px 8px', borderRadius: '999px' }}>You</span>}</td><td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td><td style={s.td}>{user.picks || 0}/24</td></tr>)}</tbody></table></div>}
+        {activeTab === 'picks' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 My Picks</h2>{!selectedRace ? <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => { const pick = getUserPick(race.id); return <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: pick ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}><div><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ fontSize: '11px', fontWeight: '700', background: '#475569', padding: '3px 7px', borderRadius: '4px' }}>R{i + 1}</span><span style={{ fontWeight: '700' }}>{race.name}</span></div><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.location}</p><span style={{ ...s.badge, background: race.pickType.includes('Constructor') ? 'rgba(168, 85, 247, 0.2)' : race.pickType.includes('2') ? 'rgba(251, 146, 60, 0.2)' : 'rgba(74, 222, 128, 0.2)', color: race.pickType.includes('Constructor') ? '#c084fc' : race.pickType.includes('2') ? '#fb923c' : '#4ade80' }}>{race.pickType}</span>{pick && <p style={{ color: '#4ade80', fontSize: '13px', marginTop: '6px' }}>✓ {pick.picks && pick.picks.drivers ? pick.picks.drivers.map(id => { const d = drivers2026.find(x => x.Driver.driverId === id); return d ? d.Driver.familyName : id; }).join(', ') : (pick.picks && pick.picks.constructor)}</p>}</div>{!pick && <button onClick={() => setSelectedRace(race)} style={{ ...s.btn, ...s.btnRed, padding: '8px 16px' }}>Pick</button>}</div>; })}</div> : <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '20px' }}><h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0' }}>{selectedRace.name}</h3><p style={{ color: '#94a3b8', margin: '0 0 20px 0' }}>{selectedRace.pickType}</p>{selectedRace.pickType.includes('Constructor') ? <div style={s.grid}>{constructors2026.map(c => <button key={c.Constructor.constructorId} onClick={() => setSelectedConstructor(c.Constructor.name)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: 'pointer', border: selectedConstructor === c.Constructor.name ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: selectedConstructor === c.Constructor.name ? '#dc2626' : 'rgba(71, 85, 105, 0.3)', color: 'white' }}><div style={{ fontWeight: '700' }}>{c.Constructor.name}</div><div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}><span style={{ fontSize: '11px', background: 'rgba(71, 85, 105, 0.5)', padding: '2px 6px', borderRadius: '4px' }}>#{c.position}</span>{isOOT6(c.Constructor.name) && <span style={{ fontSize: '11px', background: '#7c3aed', padding: '2px 6px', borderRadius: '4px' }}>2x</span>}</div></button>)}</div> : <div><p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOTT (2x)</p><div style={s.grid}>{drivers2026.map(d => { const id = d.Driver.driverId; const name = d.Driver.givenName + ' ' + d.Driver.familyName; const picked = isDriverPicked(id); const selected = selectedDrivers.includes(id); const max = selectedRace.pickType.includes('2') ? 2 : 1; return <button key={id} onClick={() => { if (picked) return; if (selected) setSelectedDrivers(selectedDrivers.filter(x => x !== id)); else if (selectedDrivers.length < max) setSelectedDrivers([...selectedDrivers, id]); }} disabled={picked || (!selected && selectedDrivers.length >= max)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : '1px solid rgba(100, 116, 139, 0.3)', background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : 'rgba(34, 197, 94, 0.15)', color: picked ? '#64748b' : 'white', position: 'relative' }}><div style={{ fontWeight: '600' }}>{name} {isOOTT(name) && '⭐'}</div><div style={{ fontSize: '13px', color: selected ? '#fecaca' : '#94a3b8', marginTop: '4px' }}>{d.Constructors[0].name}</div>{picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}{selected && <div style={{ position: 'absolute', top: '8px', right: '8px', width: '22px', height: '22px', background: 'white', color: '#dc2626', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '11px' }}>{selectedDrivers.indexOf(id) + 1}</div>}</button>; })}</div></div>}<div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}><button onClick={savePick} disabled={(selectedRace.pickType.includes('Constructor') && !selectedConstructor) || (!selectedRace.pickType.includes('Constructor') && !selectedDrivers.length)} style={{ ...s.btn, ...s.btnGreen, opacity: ((selectedRace.pickType.includes('Constructor') && !selectedConstructor) || (!selectedRace.pickType.includes('Constructor') && !selectedDrivers.length)) ? 0.5 : 1 }}>Confirm</button><button onClick={() => { setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor(''); }} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div></div>}</div>}
+        {activeTab === 'schedule' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📅 2026 Calendar</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ fontSize: '20px', fontWeight: '800', color: '#475569', width: '36px' }}>{i + 1}</span><div><span style={{ fontWeight: '700' }}>{race.name}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{race.location} • {race.date}</p></div></div><span style={{ ...s.badge, background: race.pickType.includes('Constructor') ? '#7c3aed' : race.pickType.includes('2') ? '#ea580c' : '#16a34a' }}>{race.pickType}</span></div>)}</div></div>}
+        {activeTab === 'drivers' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏎️ 2026 Drivers</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{drivers2026.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{d.Driver.driverId}</span><div><span style={{ fontWeight: '700' }}>{name} {isOOTT(name) && '⭐'}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{d.Constructors[0].name}</p></div></div>{isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}</div>; })}</div></div>}
+        {activeTab === 'teams' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 2026 Teams</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>{constructors2026.map(c => { const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === c.Constructor.name); return <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}><span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{c.position}</span><div><span style={{ fontWeight: '700', fontSize: '16px' }}>{c.Constructor.name}</span>{isOOT6(c.Constructor.name) && <span style={{ marginLeft: '8px', ...s.badge, background: '#7c3aed' }}>OOT6 2x</span>}<p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>Engine: {c.engine}</p></div></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>{teamDrivers.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '28px', height: '28px', background: '#475569', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>{d.Driver.driverId}</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{name}</span>{isOOTT(name) && <span>⭐</span>}</div>; })}</div></div>; })}</div></div>}
+      </main>
+      <footer style={{ background: 'rgba(30, 41, 59, 0.5)', borderTop: '1px solid rgba(71, 85, 105, 0.3)', padding: '20px', marginTop: '20px', textAlign: 'center' }}><p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>F1 Fantasy League • 2026 Season</p></footer>
     </div>
   );
 }
