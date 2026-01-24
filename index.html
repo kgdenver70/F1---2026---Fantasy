@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>F1 Fantasy League 2026</title>
+  <title>My Other Car is the Pace Car 2026</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -80,7 +80,7 @@ function App() {
     { id: 4, date: 'Apr 10-12', name: 'Bahrain GP', location: 'Sakhir', pickType: 'Driver', sprint: false },
     { id: 5, date: 'Apr 17-19', name: 'Saudi Arabian GP', location: 'Jeddah', pickType: 'Driver', sprint: false },
     { id: 6, date: 'May 1-3', name: 'Miami GP', location: 'Miami', pickType: 'Driver', sprint: true },
-    { id: 7, date: 'May 22-24', name: 'Canadian GP', location: 'Montreal', pickType: 'Constructor', sprint: false },
+    { id: 7, date: 'May 22-24', name: 'Canadian GP', location: 'Montreal', pickType: 'Constructor', sprint: true },
     { id: 8, date: 'Jun 5-7', name: 'Monaco GP', location: 'Monaco', pickType: 'Driver', sprint: false },
     { id: 9, date: 'Jun 12-14', name: 'Barcelona GP', location: 'Barcelona', pickType: 'Driver', sprint: false },
     { id: 10, date: 'Jun 26-28', name: 'Austrian GP', location: 'Spielberg', pickType: 'Driver', sprint: true },
@@ -94,7 +94,7 @@ function App() {
     { id: 18, date: 'Oct 9-11', name: 'Singapore GP', location: 'Singapore', pickType: 'Constructor', sprint: true },
     { id: 19, date: 'Oct 23-25', name: 'US GP', location: 'Austin', pickType: 'Driver', sprint: true },
     { id: 20, date: 'Oct 30-Nov 1', name: 'Mexico City GP', location: 'Mexico City', pickType: 'Driver', sprint: false },
-    { id: 21, date: 'Nov 6-8', name: 'Sao Paulo GP', location: 'Sao Paulo', pickType: 'Driver', sprint: true },
+    { id: 21, date: 'Nov 6-8', name: 'Sao Paulo GP', location: 'Sao Paulo', pickType: 'Driver', sprint: false },
     { id: 22, date: 'Nov 21-22', name: 'Las Vegas GP', location: 'Las Vegas', pickType: 'Driver', sprint: false },
     { id: 23, date: 'Nov 27-29', name: 'Qatar GP', location: 'Losail', pickType: 'Driver', sprint: false },
     { id: 24, date: 'Dec 4-6', name: 'Abu Dhabi GP', location: 'Yas Marina', pickType: 'Driver', sprint: false }
@@ -269,7 +269,7 @@ function App() {
       <div style={{ ...s.card, maxWidth: '400px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ display: 'inline-block', padding: '16px 28px', background: 'linear-gradient(135deg, #dc2626, #ea580c)', borderRadius: '16px', marginBottom: '16px' }}><span style={{ fontSize: '32px', fontWeight: '900' }}>F1</span></div>
-          <h1 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0' }}>FANTASY LEAGUE</h1>
+          <h1 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 4px 0' }}>MY OTHER CAR IS THE PACE CAR</h1>
           <p style={{ color: '#f87171', fontWeight: '600', margin: 0 }}>2026 SEASON</p>
           <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '8px' }}>22 Drivers • 11 Teams • 24 Races</p>
         </div>
@@ -294,7 +294,7 @@ function App() {
     <div style={s.container}>
       <header style={{ ...s.header, background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>⚙️</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>ADMIN PANEL</h1><p style={{ fontSize: '12px', color: '#e9d5ff', margin: 0 }}>F1 Fantasy League 2026</p></div></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>⚙️</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>ADMIN PANEL</h1><p style={{ fontSize: '12px', color: '#e9d5ff', margin: 0 }}>My Other Car is the Pace Car 2026</p></div></div>
           <button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white' }}>Logout</button>
         </div>
       </header>
@@ -356,7 +356,7 @@ function App() {
 
   return (
     <div style={s.container}>
-      <header style={s.header}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>FANTASY LEAGUE 2026</h1><p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p></div></div><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}><span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span><span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span></div><button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button></div></div></header>
+      <header style={s.header}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>PACE CAR 2026</h1><p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p></div></div><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}><span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span><span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span></div><button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button></div></div></header>
       <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>{['standings', 'picks', 'schedule', 'rules', 'economics', 'drivers', 'teams'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{tab === 'picks' ? 'My Picks' : tab}</button>)}</div></nav>
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
         {activeTab === 'standings' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏆 League Standings</h2><table style={s.table}><thead><tr><th style={s.th}>Pos</th><th style={s.th}>Player</th><th style={s.th}>Points</th><th style={s.th}>Picks</th></tr></thead><tbody>{users.sort((a, b) => (b.points || 0) - (a.points || 0)).map((user, i) => <tr key={user.id} style={{ background: currentUser && user.id === currentUser.id ? 'rgba(220, 38, 38, 0.1)' : 'transparent' }}><td style={s.td}><span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', fontWeight: '700', background: i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#fb923c' : '#475569', color: i < 3 ? '#000' : '#fff' }}>{i + 1}</span></td><td style={s.td}><strong>{user.nickname}</strong>{currentUser && user.id === currentUser.id && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(220, 38, 38, 0.3)', color: '#fca5a5', padding: '2px 8px', borderRadius: '999px' }}>You</span>}</td><td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td><td style={s.td}>{getUserPickCount(user.id)}/24</td></tr>)}</tbody></table></div>}
@@ -650,7 +650,7 @@ function App() {
         {activeTab === 'drivers' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏎️ 2026 Drivers</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{drivers2026.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{d.Driver.driverId}</span><div><span style={{ fontWeight: '700' }}>{name} {isOOTT(name) && '⭐'}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{d.Constructors[0].name}</p></div></div>{isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}</div>; })}</div></div>}
         {activeTab === 'teams' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 2026 Teams</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>{constructors2026.map(c => { const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === c.Constructor.name); return <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}><span style={{ width: '36px', height: '36px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>{c.position}</span><div><span style={{ fontWeight: '700', fontSize: '16px' }}>{c.Constructor.name}</span>{isOOT6(c.Constructor.name) && <span style={{ marginLeft: '8px', ...s.badge, background: '#7c3aed' }}>OOT6 2x</span>}<p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>Engine: {c.engine}</p></div></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>{teamDrivers.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '28px', height: '28px', background: '#475569', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>{d.Driver.driverId}</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{name}</span>{isOOTT(name) && <span>⭐</span>}</div>; })}</div></div>; })}</div></div>}
       </main>
-      <footer style={{ background: 'rgba(30, 41, 59, 0.5)', borderTop: '1px solid rgba(71, 85, 105, 0.3)', padding: '20px', marginTop: '20px', textAlign: 'center' }}><p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>F1 Fantasy League • 2026 Season</p></footer>
+      <footer style={{ background: 'rgba(30, 41, 59, 0.5)', borderTop: '1px solid rgba(71, 85, 105, 0.3)', padding: '20px', marginTop: '20px', textAlign: 'center' }}><p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>My Other Car is the Pace Car • 2026 Season</p></footer>
     </div>
   );
 }
