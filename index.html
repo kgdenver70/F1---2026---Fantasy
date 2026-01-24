@@ -128,6 +128,8 @@ function App() {
   const [editingPick, setEditingPick] = useState(null);
   const [editPickDrivers, setEditPickDrivers] = useState([]);
   const [editPickConstructor, setEditPickConstructor] = useState('');
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
 
   useEffect(() => {
     if (!db) {
@@ -190,6 +192,18 @@ function App() {
   };
 
   const handleLogout = () => { setCurrentUser(null); setIsAdmin(false); setShowAuth(true); setActiveTab('standings'); };
+  const handleChangePassword = () => {
+    if (!passwordData.current || !passwordData.new || !passwordData.confirm) { alert('Please fill in all fields'); return; }
+    if (passwordData.new !== passwordData.confirm) { alert('New passwords do not match'); return; }
+    if (passwordData.current !== currentUser.password) { alert('Current password is incorrect'); return; }
+    if (passwordData.new.length < 4) { alert('New password must be at least 4 characters'); return; }
+    const updatedUser = { ...currentUser, password: passwordData.new };
+    saveUser(updatedUser);
+    setCurrentUser(updatedUser);
+    setPasswordData({ current: '', new: '', confirm: '' });
+    setShowChangePassword(false);
+    alert('Password changed successfully!');
+  };
 
   const savePick = () => {
     if (!selectedRace || !currentUser) return;
@@ -302,7 +316,7 @@ function App() {
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
         {adminTab === 'users' && <div style={s.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: 0 }}>👥 Manage Users</h2><button onClick={recalculateAllPoints} style={{ ...s.btn, ...s.btnOrange }}>Recalculate All Points</button></div>
-          {editingUser && <div style={{ background: 'rgba(37, 99, 235, 0.1)', border: '1px solid #2563eb', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}><h3 style={{ margin: '0 0 16px 0' }}>Edit User: {editingUser.nickname}</h3><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Nickname</label><input value={editingUser.nickname} onChange={e => setEditingUser({...editingUser, nickname: e.target.value})} style={s.input} /></div><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Email</label><input value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} style={s.input} /></div><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Points</label><input type="number" value={editingUser.points} onChange={e => setEditingUser({...editingUser, points: parseInt(e.target.value) || 0})} style={s.input} /></div></div><div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}><button onClick={() => { saveUser(editingUser); setEditingUser(null); }} style={{ ...s.btn, ...s.btnGreen }}>Save</button><button onClick={() => setEditingUser(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div></div>}
+          {editingUser && <div style={{ background: 'rgba(37, 99, 235, 0.1)', border: '1px solid #2563eb', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}><h3 style={{ margin: '0 0 16px 0' }}>Edit User: {editingUser.nickname}</h3><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Nickname</label><input value={editingUser.nickname} onChange={e => setEditingUser({...editingUser, nickname: e.target.value})} style={s.input} /></div><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Email</label><input value={editingUser.email} onChange={e => setEditingUser({...editingUser, email: e.target.value})} style={s.input} /></div><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Points</label><input type="number" value={editingUser.points} onChange={e => setEditingUser({...editingUser, points: parseInt(e.target.value) || 0})} style={s.input} /></div><div><label style={{ fontSize: '12px', color: '#94a3b8' }}>Reset Password (leave blank to keep current)</label><input type="text" placeholder="New password" value={editingUser.newPassword || ''} onChange={e => setEditingUser({...editingUser, newPassword: e.target.value})} style={s.input} /></div></div><div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}><button onClick={() => { const userToSave = {...editingUser}; if (userToSave.newPassword) { userToSave.password = userToSave.newPassword; } delete userToSave.newPassword; saveUser(userToSave); setEditingUser(null); }} style={{ ...s.btn, ...s.btnGreen }}>Save</button><button onClick={() => setEditingUser(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div></div>}
           <table style={s.table}><thead><tr><th style={s.th}>Nickname</th><th style={s.th}>Email</th><th style={s.th}>Points</th><th style={s.th}>Picks</th><th style={s.th}>Actions</th></tr></thead><tbody>{users.sort((a,b) => (b.points || 0) - (a.points || 0)).map(user => <tr key={user.id}><td style={s.td}><strong>{user.nickname}</strong></td><td style={s.td}>{user.email}</td><td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td><td style={s.td}>{getUserPickCount(user.id)}/24</td><td style={s.td}><button onClick={() => setEditingUser({...user})} style={{ ...s.btn, ...s.btnBlue, padding: '6px 12px', marginRight: '8px' }}>Edit</button><button onClick={() => { if(window.confirm('Delete user ' + user.nickname + '?')) deleteUser(user.id); }} style={{ ...s.btn, ...s.btnRed, padding: '6px 12px' }}>Delete</button></td></tr>)}</tbody></table>
         </div>}
         {adminTab === 'results' && <div style={s.card}>
@@ -356,7 +370,22 @@ function App() {
 
   return (
     <div style={s.container}>
-      <header style={s.header}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>PACE CAR 2026</h1><p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p></div></div><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}><span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span><span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span></div><button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button></div></div></header>
+      <header style={s.header}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' }}>F1</div><div><h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>PACE CAR 2026</h1><p style={{ fontSize: '12px', color: '#fecaca', margin: 0 }}>11 Teams • 22 Drivers</p></div></div><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px 14px', borderRadius: '10px' }}><span style={{ fontWeight: '700', fontSize: '14px' }}>{currentUser && currentUser.nickname}</span><span style={{ marginLeft: '8px', color: '#fecaca', fontSize: '12px' }}>{currentUser && currentUser.points} pts</span></div><button onClick={() => setShowChangePassword(true)} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>⚙️</button><button onClick={handleLogout} style={{ ...s.btn, background: 'rgba(255,255,255,0.15)', color: 'white', padding: '10px 16px' }}>Logout</button></div></div></header>
+      
+      {showChangePassword && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+        <div style={{ background: '#1e293b', borderRadius: '16px', padding: '24px', maxWidth: '400px', width: '100%' }}>
+          <h3 style={{ margin: '0 0 20px 0', fontSize: '20px' }}>🔐 Change Password</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <input type="password" placeholder="Current Password" value={passwordData.current} onChange={e => setPasswordData({...passwordData, current: e.target.value})} style={s.input} />
+            <input type="password" placeholder="New Password" value={passwordData.new} onChange={e => setPasswordData({...passwordData, new: e.target.value})} style={s.input} />
+            <input type="password" placeholder="Confirm New Password" value={passwordData.confirm} onChange={e => setPasswordData({...passwordData, confirm: e.target.value})} style={s.input} />
+          </div>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+            <button onClick={handleChangePassword} style={{ ...s.btn, ...s.btnGreen }}>Change Password</button>
+            <button onClick={() => { setShowChangePassword(false); setPasswordData({ current: '', new: '', confirm: '' }); }} style={{ ...s.btn, ...s.btnGray }}>Cancel</button>
+          </div>
+        </div>
+      </div>}
       <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>{['standings', 'picks', 'schedule', 'rules', 'economics', 'drivers', 'teams'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{tab === 'picks' ? 'My Picks' : tab}</button>)}</div></nav>
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
         {activeTab === 'standings' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏆 League Standings</h2><table style={s.table}><thead><tr><th style={s.th}>Pos</th><th style={s.th}>Player</th><th style={s.th}>Points</th><th style={s.th}>Picks</th></tr></thead><tbody>{users.sort((a, b) => (b.points || 0) - (a.points || 0)).map((user, i) => <tr key={user.id} style={{ background: currentUser && user.id === currentUser.id ? 'rgba(220, 38, 38, 0.1)' : 'transparent' }}><td style={s.td}><span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', fontWeight: '700', background: i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#fb923c' : '#475569', color: i < 3 ? '#000' : '#fff' }}>{i + 1}</span></td><td style={s.td}><strong>{user.nickname}</strong>{currentUser && user.id === currentUser.id && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(220, 38, 38, 0.3)', color: '#fca5a5', padding: '2px 8px', borderRadius: '999px' }}>You</span>}</td><td style={s.td}><span style={{ fontSize: '20px', fontWeight: '700' }}>{user.points || 0}</span></td><td style={s.td}>{getUserPickCount(user.id)}/24</td></tr>)}</tbody></table></div>}
