@@ -874,7 +874,7 @@ function App() {
               }
             });
             
-            users.forEach(u => {
+            payingUsers.forEach(u => {
               userEarnings[u.id].total = userEarnings[u.id].season + userEarnings[u.id].weekly + userEarnings[u.id].sprint - 1000;
             });
             
@@ -898,7 +898,7 @@ function App() {
                 <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#fbbf24' }}>🏆 Season Standings Payouts</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {seasonPayouts.map((p, idx) => {
-                    const user = sortedUsers[idx];
+                    const user = sortedPayingUsers[idx];
                     const payout = Math.round(entryFeePool * p.pct);
                     return <div key={p.place} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '12px' }}>
                       <div><span style={{ fontWeight: '700', marginRight: '12px' }}>{p.label}</span><span style={{ color: user ? '#fff' : '#64748b' }}>{user ? user.nickname : 'TBD'}</span>{user && <span style={{ color: '#94a3b8', marginLeft: '8px' }}>({user.points || 0} pts)</span>}</div>
@@ -951,7 +951,7 @@ function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedUsers.map(user => {
+                      {sortedPayingUsers.map(user => {
                         const e = userEarnings[user.id];
                         return <tr key={user.id}>
                           <td style={s.td}><strong>{user.nickname}</strong></td>
