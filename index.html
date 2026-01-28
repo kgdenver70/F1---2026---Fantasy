@@ -116,6 +116,108 @@ function App() {
     'Cadillac': '#D4AF37'
   };
   const getTeamColor = (teamName) => teamColors[teamName] || '#64748b';
+  
+  // Driver photos - Replace placeholder URLs with actual Wikipedia Commons URLs
+  // Format: driverId: 'https://upload.wikimedia.org/wikipedia/commons/...'
+  const driverPhotos = {
+    '4': '', // Lando Norris
+    '81': '', // Oscar Piastri
+    '16': '', // Charles Leclerc
+    '44': '', // Lewis Hamilton
+    '1': '', // Max Verstappen
+    '6': '', // Isack Hadjar
+    '63': '', // George Russell
+    '12': '', // Kimi Antonelli
+    '14': '', // Fernando Alonso
+    '18': '', // Lance Stroll
+    '10': '', // Pierre Gasly
+    '43': '', // Franco Colapinto
+    '23': '', // Alexander Albon
+    '55': '', // Carlos Sainz
+    '87': '', // Oliver Bearman
+    '31': '', // Esteban Ocon
+    '30': '', // Liam Lawson
+    '45': '', // Arvid Lindblad
+    '27': '', // Nico Hulkenberg
+    '38': '', // Gabriel Bortoleto
+    '11': '', // Sergio Perez
+    '77': '', // Valtteri Bottas
+  };
+  const getDriverPhoto = (driverId) => driverPhotos[driverId] || '';
+  
+  // Team logo abbreviations for generating SVG logos
+  const teamAbbrev = {
+    'Red Bull': 'RB',
+    'Ferrari': 'FER',
+    'McLaren': 'MCL',
+    'Mercedes': 'MER',
+    'Aston Martin': 'AM',
+    'Alpine': 'ALP',
+    'Williams': 'WIL',
+    'Racing Bulls': 'RCB',
+    'Haas': 'HAAS',
+    'Audi': 'AUDI',
+    'Cadillac': 'CAD'
+  };
+  const getTeamAbbrev = (teamName) => teamAbbrev[teamName] || teamName.substring(0, 3).toUpperCase();
+  
+  // Team Logo component - generates SVG logo with team colors
+  const TeamLogo = ({ team, size = 48 }) => {
+    const color = getTeamColor(team);
+    const abbrev = getTeamAbbrev(team);
+    const fontSize = size < 40 ? 10 : size < 60 ? 12 : 14;
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" style={{ borderRadius: '8px', overflow: 'hidden' }}>
+        <rect width="48" height="48" fill={color} />
+        <text x="24" y="26" textAnchor="middle" dominantBaseline="middle" fill="#fff" fontSize={fontSize} fontWeight="700" fontFamily="system-ui, sans-serif" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>{abbrev}</text>
+      </svg>
+    );
+  };
+  
+  // Driver Photo component - shows photo or fallback to initials
+  const DriverPhoto = ({ driver, size = 48 }) => {
+    const photo = getDriverPhoto(driver.driverId);
+    const teamColor = getTeamColor(driver.Constructors ? driver.Constructors[0].name : '');
+    const initials = driver.givenName.charAt(0) + driver.familyName.charAt(0);
+    
+    if (photo) {
+      return (
+        <img 
+          src={photo} 
+          alt={`${driver.givenName} ${driver.familyName}`}
+          style={{ 
+            width: size, 
+            height: size, 
+            borderRadius: '50%', 
+            objectFit: 'cover',
+            border: `2px solid ${teamColor}`
+          }}
+          onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+        />
+      );
+    }
+    
+    return (
+      <div style={{ 
+        width: size, 
+        height: size, 
+        borderRadius: '50%', 
+        background: `linear-gradient(135deg, ${teamColor}, ${teamColor}88)`,
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        fontWeight: '700',
+        fontSize: size * 0.35,
+        color: '#fff',
+        textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+        border: `2px solid ${teamColor}`,
+        flexShrink: 0
+      }}>
+        {initials}
+      </div>
+    );
+  };
+  
   const ADMIN_PASSWORD = "f1admin2026";
 
   const [activeTab, setActiveTab] = useState('standings');
@@ -985,8 +1087,8 @@ function App() {
           })()}
         </div>}
 
-        {activeTab === 'drivers' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏎️ 2026 Drivers</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{drivers2026.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; const teamColor = getTeamColor(d.Constructors[0].name); return <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ width: '36px', height: '36px', background: teamColor, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{d.Driver.driverId}</span><div><span style={{ fontWeight: '700' }}>{name} {isOOTT(name) && '⭐'}</span><p style={{ fontSize: '13px', margin: '2px 0 0 0', color: teamColor, fontWeight: '600' }}>{d.Constructors[0].name}</p></div></div>{isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}</div>; })}</div></div>}
-        {activeTab === 'teams' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 2026 Teams</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>{constructors2026.map(c => { const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === c.Constructor.name); const teamColor = getTeamColor(c.Constructor.name); return <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px', borderLeft: `4px solid ${teamColor}` }}><div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}><span style={{ width: '36px', height: '36px', background: teamColor, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{c.position}</span><div><span style={{ fontWeight: '700', fontSize: '16px', color: teamColor }}>{c.Constructor.name}</span>{isOOT6(c.Constructor.name) && <span style={{ marginLeft: '8px', ...s.badge, background: '#7c3aed' }}>OOT6 2x</span>}<p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>Engine: {c.engine}</p></div></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>{teamDrivers.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '28px', height: '28px', background: teamColor, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{d.Driver.driverId}</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{name}</span>{isOOTT(name) && <span>⭐</span>}</div>; })}</div></div>; })}</div></div>}
+        {activeTab === 'drivers' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏎️ 2026 Drivers</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{drivers2026.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; const teamColor = getTeamColor(d.Constructors[0].name); return <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><DriverPhoto driver={{ driverId: d.Driver.driverId, givenName: d.Driver.givenName, familyName: d.Driver.familyName, Constructors: d.Constructors }} size={48} /><div><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ fontWeight: '700' }}>{name}</span><span style={{ background: teamColor, color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '700' }}>#{d.Driver.driverId}</span>{isOOTT(name) && <span>⭐</span>}</div><p style={{ fontSize: '13px', margin: '2px 0 0 0', color: teamColor, fontWeight: '600' }}>{d.Constructors[0].name}</p></div></div>{isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}</div>; })}</div></div>}
+        {activeTab === 'teams' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>🏁 2026 Teams</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>{constructors2026.map(c => { const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === c.Constructor.name); const teamColor = getTeamColor(c.Constructor.name); return <div key={c.Constructor.constructorId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px', borderLeft: `4px solid ${teamColor}` }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}><TeamLogo team={c.Constructor.name} size={56} /><div style={{ flex: 1 }}><div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}><span style={{ fontWeight: '700', fontSize: '18px', color: teamColor }}>{c.Constructor.name}</span><span style={{ background: 'rgba(71, 85, 105, 0.5)', color: '#94a3b8', padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}>#{c.position}</span>{isOOT6(c.Constructor.name) && <span style={{ ...s.badge, background: '#7c3aed' }}>OOT6 2x</span>}</div><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0 0 0' }}>Engine: {c.engine}</p></div></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>{teamDrivers.map(d => { const name = d.Driver.givenName + ' ' + d.Driver.familyName; return <div key={d.Driver.driverId} style={{ background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}><DriverPhoto driver={{ driverId: d.Driver.driverId, givenName: d.Driver.givenName, familyName: d.Driver.familyName, Constructors: d.Constructors }} size={36} /><div><span style={{ fontWeight: '600', fontSize: '14px' }}>{name}</span>{isOOTT(name) && <span style={{ marginLeft: '4px' }}>⭐</span>}</div></div>; })}</div></div>; })}</div></div>}
       </main>
       <footer style={{ background: 'rgba(30, 41, 59, 0.5)', borderTop: '1px solid rgba(71, 85, 105, 0.3)', padding: '20px', marginTop: '20px', textAlign: 'center' }}><p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>My Other Car is the Safety Car • 2026 Season</p></footer>
     </div>
