@@ -176,45 +176,45 @@ function App() {
   
   // Driver Photo component - shows photo or fallback to initials
   const DriverPhoto = ({ driver, size = 48 }) => {
+    const [imgError, setImgError] = React.useState(false);
     const photo = getDriverPhoto(driver.driverId);
     const teamColor = getTeamColor(driver.Constructors ? driver.Constructors[0].name : '');
     const initials = driver.givenName.charAt(0) + driver.familyName.charAt(0);
     
-    if (photo) {
-      return (
-        <img 
-          src={photo} 
-          alt={`${driver.givenName} ${driver.familyName}`}
-          style={{ 
-            width: size, 
-            height: size, 
-            borderRadius: '50%', 
-            objectFit: 'cover',
-            border: `2px solid ${teamColor}`
-          }}
-          onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-        />
-      );
+    const fallbackStyle = { 
+      width: size, 
+      height: size, 
+      borderRadius: '50%', 
+      background: `linear-gradient(135deg, ${teamColor}, ${teamColor}88)`,
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      fontWeight: '700',
+      fontSize: size * 0.35,
+      color: '#fff',
+      textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+      border: `2px solid ${teamColor}`,
+      flexShrink: 0
+    };
+    
+    if (!photo || imgError) {
+      return <div style={fallbackStyle}>{initials}</div>;
     }
     
     return (
-      <div style={{ 
-        width: size, 
-        height: size, 
-        borderRadius: '50%', 
-        background: `linear-gradient(135deg, ${teamColor}, ${teamColor}88)`,
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        fontWeight: '700',
-        fontSize: size * 0.35,
-        color: '#fff',
-        textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-        border: `2px solid ${teamColor}`,
-        flexShrink: 0
-      }}>
-        {initials}
-      </div>
+      <img 
+        src={photo} 
+        alt={`${driver.givenName} ${driver.familyName}`}
+        style={{ 
+          width: size, 
+          height: size, 
+          borderRadius: '50%', 
+          objectFit: 'cover',
+          border: `2px solid ${teamColor}`,
+          flexShrink: 0
+        }}
+        onError={() => setImgError(true)}
+      />
     );
   };
   
