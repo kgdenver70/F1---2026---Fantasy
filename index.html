@@ -120,28 +120,28 @@ function App() {
   // Driver photos - Replace placeholder URLs with actual Wikipedia Commons URLs
   // Format: driverId: 'https://upload.wikimedia.org/wikipedia/commons/...'
   const driverPhotos = {
-    '4': 'https://img2.51gt3.com/rac/racer/202503/cfc139b2b49e48cd80a436c00a71711d.png', // Lando Norris
-    '81': 'https://img2.51gt3.com/rac/racer/202503/4a3ecd96c2fd49508824cae497bfcec3.png', // Oscar Piastri
-    '16': 'https://img2.51gt3.com/rac/racer/202503/fe2de9975d864e38acfd9933164954a6.png', // Charles Leclerc
-    '44': 'https://img2.51gt3.com/rac/racer/202503/0ff8ae7649b447bd8e023f4e31dc4042.png', // Lewis Hamilton
-    '1': 'https://img2.51gt3.com/rac/racer/202404/736683032ce24f06ba67ce44a2cf0b73.jpg', // Max Verstappen
-    '6': 'https://www.redbullracing.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fisack-hadjar.a13a3e30.png&w=640&q=75', // Isack Hadjar
-    '63': 'https://img2.51gt3.com/rac/racer/202503/f10f01a1704147ca90ab3a4325f38785.png', // George Russell
-    '12': 'https://img2.51gt3.com/rac/racer/202503/bcca7f61b6684e26bb28aedaf8d97c53.png', // Kimi Antonelli
-    '14': 'https://img2.51gt3.com/rac/racer/202503/25ccca7ffa96437aa54f169a4e9338fa.png', // Fernando Alonso
-    '18': 'https://img2.51gt3.com/rac/racer/202503/2869081e10e6412894446d1320c9cb44.png', // Lance Stroll
-    '10': 'https://a.espncdn.com/combiner/i?img=/i/headshots/rpm/players/full/5501.png&w=350&h=254', // Pierre Gasly
-    '43': 'https://a.espncdn.com/combiner/i?img=/i/headshots/rpm/players/full/5823.png&w=350&h=254', // Franco Colapinto
-    '23': 'https://img2.51gt3.com/rac/racer/202503/1f1fd439e5344c7a83faf4a80d09486f.png', // Alexander Albon
-    '55': 'https://a.espncdn.com/combiner/i?img=/i/headshots/rpm/players/full/4686.png&w=350&h=254', // Carlos Sainz
-    '87': 'https://img2.51gt3.com/rac/racer/202503/b4e1b56f7f2a4c989f16787b26852cba.png', // Oliver Bearman
-    '31': 'https://img2.51gt3.com/rac/racer/202503/34d4155677ae4874aae0240f9b366cc3.png', // Esteban Ocon
-    '30': 'https://a.espncdn.com/combiner/i?img=/i/headshots/rpm/players/full/5741.png&w=350&h=254', // Liam Lawson
-    '45': 'https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcSYkPKIrhfX9q6lsN_ytLufylPohuB6MeViwy1jKk43JflG-ehMDGLT7kZPsSIYLH3_93iSYUbHoTEzY2s', // Arvid Lindblad
-    '27': 'https://a.espncdn.com/combiner/i?img=/i/headshots/rpm/players/full/4396.png&w=350&h=254', // Nico Hulkenberg
-    '38': 'https://a.espncdn.com/combiner/i?img=/i/headshots/rpm/players/full/5835.png&w=350&h=254', // Gabriel Bortoleto
-    '11': 'https://e01-phantom-marca-mx.uecdn.es/f580c66eea3f2deba56653a759d2f233/resize/750/f/webp/mx/assets/multimedia/imagenes/2025/11/13/17630351716021.jpg', // Sergio Perez
-    '77': 'https://destinationformula1.com/wp-content/uploads/2026/01/Valtteri-Bottas-Cadillac.jpg', // Valtteri Bottas
+    '4': '', // Lando Norris
+    '81': '', // Oscar Piastri
+    '16': '', // Charles Leclerc
+    '44': '', // Lewis Hamilton
+    '1': '', // Max Verstappen
+    '6': '', // Isack Hadjar
+    '63': '', // George Russell
+    '12': '', // Kimi Antonelli
+    '14': '', // Fernando Alonso
+    '18': '', // Lance Stroll
+    '10': '', // Pierre Gasly
+    '43': '', // Franco Colapinto
+    '23': '', // Alexander Albon
+    '55': '', // Carlos Sainz
+    '87': '', // Oliver Bearman
+    '31': '', // Esteban Ocon
+    '30': '', // Liam Lawson
+    '45': '', // Arvid Lindblad
+    '27': '', // Nico Hulkenberg
+    '38': '', // Gabriel Bortoleto
+    '11': '', // Sergio Perez
+    '77': '', // Valtteri Bottas
   };
   const getDriverPhoto = (driverId) => driverPhotos[driverId] || '';
   
@@ -851,7 +851,7 @@ function App() {
               <li>Each constructor can only be picked <strong>ONCE</strong> per season</li>
               <li>Picks lock before each race - make your picks early!</li>
               <li><strong>Grand Prix races</strong> count for season points (P1 = 27 pts to P22 = 1 pt)</li>
-              <li><strong>Sprint races</strong> do NOT count for season points - only for the $20 weekly sprint bet</li>
+              <li><strong>Sprint races</strong> do NOT count for season points - only for the $10 weekly sprint bet</li>
               <li>22 Driver races + 2 Constructor races (Canada & Singapore) = 24 total</li>
             </ul>
           </div>
@@ -860,7 +860,7 @@ function App() {
             <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#fbbf24' }}>💰 Economics</h3>
             
             <div style={{ marginBottom: '16px' }}>
-              <h4 style={{ color: '#fbbf24', margin: '0 0 8px 0' }}>Season Entry Fee: $400</h4>
+              <h4 style={{ color: '#fbbf24', margin: '0 0 8px 0' }}>Season Entry Fee: $250</h4>
               <p style={{ color: '#cbd5e1', margin: '0 0 8px 0' }}>Payable at end of season. Payout based on final standings:</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 <span style={{ background: 'rgba(251, 191, 36, 0.2)', padding: '4px 12px', borderRadius: '8px', fontSize: '13px' }}>🥇 P1: 45%</span>
@@ -872,22 +872,22 @@ function App() {
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <h4 style={{ color: '#4ade80', margin: '0 0 8px 0' }}>Weekly Race Pool: $20 × 24 races = $480</h4>
+              <h4 style={{ color: '#4ade80', margin: '0 0 8px 0' }}>Weekly Race Pool: $10 × 24 races = $240</h4>
               <p style={{ color: '#94a3b8', margin: 0, fontSize: '14px' }}>Highest finishing position wins. Ties split the pot. No carryovers.</p>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <h4 style={{ color: '#c084fc', margin: '0 0 8px 0' }}>Sprint Race Pool: $20 × 6 sprints = $120</h4>
+              <h4 style={{ color: '#c084fc', margin: '0 0 8px 0' }}>Sprint Race Pool: $10 × 6 sprints = $60</h4>
               <p style={{ color: '#94a3b8', margin: 0, fontSize: '14px' }}>Highest finishing position wins. Ties split the pot. No carryovers.</p>
             </div>
 
             <div style={{ background: 'rgba(251, 191, 36, 0.15)', borderRadius: '8px', padding: '12px', marginTop: '16px' }}>
-              <h4 style={{ color: '#fbbf24', margin: '0 0 8px 0' }}>💵 Total Investment Per Poolie: $1,000</h4>
+              <h4 style={{ color: '#fbbf24', margin: '0 0 8px 0' }}>💵 Total Investment Per Poolie: $550</h4>
               <div style={{ color: '#cbd5e1', fontSize: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}><span>Entry Fee</span><span>$400</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}><span>Weekly Grand Prix (24)</span><span>$480</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(251, 191, 36, 0.3)', paddingBottom: '4px', marginBottom: '4px' }}><span>Sprint Races (6)</span><span>$120</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700' }}><span>Total</span><span>$1,000</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}><span>Entry Fee</span><span>$250</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}><span>Weekly Grand Prix (24)</span><span>$240</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(251, 191, 36, 0.3)', paddingBottom: '4px', marginBottom: '4px' }}><span>Sprint Races (6)</span><span>$60</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700' }}><span>Total</span><span>$550</span></div>
               </div>
             </div>
           </div>
@@ -899,10 +899,10 @@ function App() {
           {(() => {
             const payingUsers = users.filter(u => !u.justForFun);
             const numPoolies = payingUsers.length;
-            const entryFeePool = numPoolies * 400;
-            const weeklyPool = numPoolies * 20;
-            const sprintPool = numPoolies * 20;
-            const totalPool = numPoolies * 1000;
+            const entryFeePool = numPoolies * 250;
+            const weeklyPool = numPoolies * 10;
+            const sprintPool = numPoolies * 10;
+            const totalPool = numPoolies * 550;
             
             const seasonPayouts = [
               { place: 1, pct: 0.45, label: '🥇 P1' },
@@ -992,7 +992,7 @@ function App() {
             });
             
             payingUsers.forEach(u => {
-              userEarnings[u.id].total = userEarnings[u.id].season + userEarnings[u.id].weekly + userEarnings[u.id].sprint - 1000;
+              userEarnings[u.id].total = userEarnings[u.id].season + userEarnings[u.id].weekly + userEarnings[u.id].sprint - 550;
             });
             
             return (<div>
@@ -1075,7 +1075,7 @@ function App() {
                           <td style={s.td}>${e.season.toLocaleString()}</td>
                           <td style={s.td}>${e.weekly.toLocaleString()}</td>
                           <td style={s.td}>${e.sprint.toLocaleString()}</td>
-                          <td style={s.td}>-$1,000</td>
+                          <td style={s.td}>-$550</td>
                           <td style={{ ...s.td, fontWeight: '700', color: e.total >= 0 ? '#4ade80' : '#f87171' }}>{e.total >= 0 ? '+' : ''}${e.total.toLocaleString()}</td>
                         </tr>;
                       })}
