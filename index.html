@@ -906,7 +906,7 @@ function App() {
                           let position = '';
                           let teamColor = '#64748b';
                           
-                          if (pick.picks.drivers && pick.picks.drivers[0]) {
+                          if (pick.picks.drivers && pick.picks.drivers.length > 0 && pick.picks.drivers[0]) {
                             const driver = drivers2026.find(d => d.Driver.driverId === pick.picks.drivers[0]);
                             if (driver) {
                               pickName = driver.Driver.givenName + ' ' + driver.Driver.familyName;
@@ -917,9 +917,7 @@ function App() {
                               const driverResult = result.driverPositions[pick.picks.drivers[0]];
                               position = driverResult && driverResult.position > 0 ? 'P' + driverResult.position : 'DNF';
                             }
-                          }
-                          
-                          if (pick.picks.constructor) {
+                          } else if (pick.picks.constructor && pick.picks.constructor.length > 0) {
                             pickName = pick.picks.constructor;
                             pickDetails = 'Constructor Pick';
                             teamColor = getTeamColor(pick.picks.constructor);
