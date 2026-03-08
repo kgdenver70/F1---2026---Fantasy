@@ -303,6 +303,50 @@ function App() {
     db.ref('lockTimes').on('value', (snapshot) => { const data = snapshot.val(); if (data) setLockTimes(data); });
   }, []);
 
+  // Auto-recalculate points when data loads
+  React.useEffect(() => {
+    if (users.length > 0 && Object.keys(raceResults).length > 0 && Object.keys(userPicks).length > 0) {
+      const pointsTable = { 1: 27, 2: 21, 3: 20, 4: 19, 5: 18, 6: 17, 7: 16, 8: 15, 9: 14, 10: 13, 11: 12, 12: 11, 13: 10, 14: 9, 15: 8, 16: 7, 17: 6, 18: 5, 19: 4, 20: 3, 21: 2, 22: 1 };
+      let needsUpdate = false;
+      const updatedUsers = users.map(user => {
+        let total = 0;
+        Object.entries(userPicks).forEach(([key, pick]) => {
+          if (!key.startsWith(user.id + '-')) return;
+          const raceId = key.split('-')[1];
+          const result = raceResults[raceId];
+          if (!result || !result.driverPositions) return;
+          if (pick.picks && pick.picks.drivers) {
+            pick.picks.drivers.forEach(driverId => {
+              const driverResult = result.driverPositions[driverId];
+              if (driverResult && driverResult.position > 0) {
+                let pts = pointsTable[driverResult.position] || 0;
+                const driver = drivers2026.find(d => d.Driver.driverId === driverId);
+                if (driver && isOOTT(driver.Driver.givenName + ' ' + driver.Driver.familyName)) pts *= 2;
+                total += pts;
+              }
+            });
+          }
+          if (pick.picks && pick.picks.constructor) {
+            const constructorName = pick.picks.constructor;
+            const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === constructorName);
+            let constructorPts = 0;
+            teamDrivers.forEach(d => {
+              const driverResult = result.driverPositions[d.Driver.driverId];
+              if (driverResult && driverResult.position > 0) {
+                constructorPts += pointsTable[driverResult.position] || 0;
+              }
+            });
+            if (!isOOT6(constructorName)) constructorPts = Math.round(constructorPts / 2);
+            total += constructorPts;
+          }
+        });
+        if (user.points !== total) needsUpdate = true;
+        return { ...user, points: total };
+      });
+      if (needsUpdate) setUsers(updatedUsers);
+    }
+  }, [raceResults, userPicks]);
+
   const saveUser = (user) => { if (db) db.ref('users/' + user.id).set(user); setUsers(users.map(u => u.id === user.id ? user : u)); };
   const addUser = (user) => { if (db) db.ref('users/' + user.id).set(user); setUsers([...users, user]); };
   const deleteUser = (userId) => { if (db) db.ref('users/' + userId).remove(); setUsers(users.filter(u => u.id !== userId)); };
@@ -457,16 +501,20 @@ function App() {
   const savePick = () => {
     if (!selectedRace || !currentUser) return;
     if (isRaceLocked(selectedRace.id)) { alert('This race is now locked. Picks are closed.'); setSelectedRace(null); return; }
+    const existingPick = userPicks[currentUser.id + '-' + selectedRace.id];
     const pickName = selectedRace.pickType === 'Constructor' ? selectedConstructor : selectedDrivers.map(id => { const d = drivers2026.find(x => x.Driver.driverId === id); return d ? d.Driver.givenName + ' ' + d.Driver.familyName : id; }).join(', ');
-    if (!window.confirm(`Confirm pick for ${selectedRace.name}:\n\n${pickName}\n\nYou can only use this ${selectedRace.pickType === 'Constructor' ? 'constructor' : 'driver'} once per season!`)) return;
+    const confirmMsg = existingPick 
+      ? `Update pick for ${selectedRace.name}?\n\n${pickName}\n\nThis will replace your current pick.`
+      : `Confirm pick for ${selectedRace.name}:\n\n${pickName}\n\nYou can only use this ${selectedRace.pickType === 'Constructor' ? 'constructor' : 'driver'} once per season!`;
+    if (!window.confirm(confirmMsg)) return;
     const key = currentUser.id + '-' + selectedRace.id;
     const pickData = { oderId: currentUser.id, raceId: selectedRace.id, picks: selectedRace.pickType === 'Constructor' ? { constructor: selectedConstructor } : { drivers: [...selectedDrivers] }, timestamp: Date.now() };
     savePicks(key, pickData);
     setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor('');
   };
 
-  const isDriverPicked = (id) => currentUser && Object.values(userPicks).some(p => p.oderId === currentUser.id && p.picks && p.picks.drivers && p.picks.drivers.includes(id));
-  const isConstructorPicked = (name) => currentUser && Object.values(userPicks).some(p => p.oderId === currentUser.id && p.picks && p.picks.constructor === name);
+  const isDriverPicked = (id) => currentUser && Object.entries(userPicks).some(([key, p]) => p.oderId === currentUser.id && p.picks && p.picks.drivers && p.picks.drivers.includes(id) && (!selectedRace || key !== currentUser.id + '-' + selectedRace.id));
+  const isConstructorPicked = (name) => currentUser && Object.entries(userPicks).some(([key, p]) => p.oderId === currentUser.id && p.picks && p.picks.constructor === name && (!selectedRace || key !== currentUser.id + '-' + selectedRace.id));
   const getDoublePickCount = () => {
     if (!currentUser) return 0;
     return Object.values(userPicks).filter(p => p.oderId === currentUser.id && p.picks && p.picks.drivers && p.picks.drivers.length === 2).length;
@@ -575,7 +623,7 @@ function App() {
           {!selectedRaceForResult ? <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => { const hasResult = raceResults[race.id]; const locked = isRaceLocked(race.id); const lockTime = lockTimes[race.id] || ''; return <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: locked ? '1px solid rgba(239, 68, 68, 0.5)' : hasResult ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}><div style={{ flex: '1', minWidth: '200px' }}><span style={{ fontWeight: '700' }}>R{i+1}: {race.name}</span><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.pickType}</p>{hasResult && <span style={{ color: '#4ade80', fontSize: '13px' }}>✓ Results entered</span>}{locked && <span style={{ color: '#f87171', fontSize: '13px', marginLeft: '8px' }}>🔒 Locked</span>}</div><div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}><div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontSize: '12px', color: '#94a3b8' }}>⏱️ Lock:</span><input type="datetime-local" value={lockTime} onChange={e => setRaceLockTime(race.id, e.target.value)} style={{ ...s.input, padding: '6px 8px', fontSize: '12px', width: '180px' }} /></div><button onClick={() => toggleRaceLock(race.id)} style={{ ...s.btn, ...(locked ? s.btnGreen : s.btnRed), padding: '8px 16px' }}>{locked ? '🔓 Unlock' : '🔒 Lock'}</button><button onClick={() => setSelectedRaceForResult(race)} style={{ ...s.btn, ...(hasResult ? s.btnGreen : s.btnBlue), padding: '8px 16px' }}>{hasResult ? 'Edit' : 'Enter'} Results</button></div></div>; })}</div> : <div>
             <h3 style={{ margin: '0 0 16px 0' }}>{selectedRaceForResult.name} - {selectedRaceForResult.pickType}</h3>
             {selectedRaceForResult.pickType === 'Constructor' ? <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter driver positions (1-22, 0=DNF). Constructor points will be calculated from their drivers.</p><div style={s.grid}>{drivers2026.map(d => <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{d.Driver.givenName} {d.Driver.familyName}</label><p style={{ color: '#94a3b8', fontSize: '12px', margin: '2px 0 8px 0' }}>{d.Constructors[0].name}</p><input type="number" min="0" max="22" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].driverPositions && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId] && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { driverPositions: {} }; current.driverPositions = current.driverPositions || {}; current.driverPositions[d.Driver.driverId] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={s.input} /></div>)}</div></div> : <div><p style={{ color: '#94a3b8', marginBottom: '16px' }}>Enter driver positions (1-22, 0=DNF):</p><div style={s.grid}>{drivers2026.map(d => <div key={d.Driver.driverId} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '8px', padding: '12px' }}><label style={{ fontWeight: '600' }}>{d.Driver.givenName} {d.Driver.familyName}</label><p style={{ color: '#94a3b8', fontSize: '12px', margin: '2px 0 8px 0' }}>{d.Constructors[0].name}</p><input type="number" min="0" max="22" placeholder="Pos" value={(raceResults[selectedRaceForResult.id] && raceResults[selectedRaceForResult.id].driverPositions && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId] && raceResults[selectedRaceForResult.id].driverPositions[d.Driver.driverId].position) || ''} onChange={e => { const pos = parseInt(e.target.value) || 0; const current = raceResults[selectedRaceForResult.id] || { driverPositions: {} }; current.driverPositions = current.driverPositions || {}; current.driverPositions[d.Driver.driverId] = { position: pos }; setRaceResults({ ...raceResults, [selectedRaceForResult.id]: current }); }} style={s.input} /></div>)}</div></div>}
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}><button onClick={() => { saveRaceResult(selectedRaceForResult.id, raceResults[selectedRaceForResult.id]); setSelectedRaceForResult(null); alert('Results saved!'); }} style={{ ...s.btn, ...s.btnGreen }}>Save Results</button><button onClick={() => setSelectedRaceForResult(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}><button onClick={() => { saveRaceResult(selectedRaceForResult.id, raceResults[selectedRaceForResult.id]); setTimeout(() => { users.forEach(user => { const points = calculateUserPoints(user.id); saveUser({ ...user, points }); }); }, 500); setSelectedRaceForResult(null); alert('Results saved and points recalculated!'); }} style={{ ...s.btn, ...s.btnGreen }}>Save Results</button><button onClick={() => setSelectedRaceForResult(null)} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div>
           </div>}
         </div>}
         {adminTab === 'picks' && <div style={s.card}>
@@ -699,7 +747,7 @@ function App() {
         </div>
       </div>}
 
-      <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>{['standings', 'picks', 'schedule', 'history', 'rules', 'economics', 'drivers', 'teams'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{tab === 'picks' ? 'My Picks' : tab}</button>)}</div></nav>
+      <nav style={s.nav}><div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>{['standings', 'picks', 'economics', 'history', 'schedule', 'drivers', 'teams', 'rules'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...s.btn, ...(activeTab === tab ? s.btnRed : s.btnGray), textTransform: 'capitalize', whiteSpace: 'nowrap' }}>{tab === 'picks' ? 'My Picks' : tab}</button>)}</div></nav>
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
         {activeTab === 'standings' && <div style={s.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
@@ -720,15 +768,17 @@ function App() {
             });
           })()}</tbody></table>
         </div>}
-        {activeTab === 'picks' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 My Picks</h2>{!selectedRace ? <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => { const pick = getUserPick(race.id); const locked = isRaceLocked(race.id); const countdown = getCountdown(race.id); return <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: pick ? '1px solid rgba(74, 222, 128, 0.3)' : locked ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}><div><div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}><span style={{ fontSize: '11px', fontWeight: '700', background: '#475569', padding: '3px 7px', borderRadius: '4px' }}>R{i + 1}</span><span style={{ fontWeight: '700' }}>{race.name}</span>{locked && <span style={{ fontSize: '11px', background: 'rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '3px 7px', borderRadius: '4px' }}>🔒 Locked</span>}{!locked && countdown && <span style={{ fontSize: '11px', background: 'rgba(251, 191, 36, 0.3)', color: '#fbbf24', padding: '3px 7px', borderRadius: '4px' }}>⏱️ {countdown}</span>}</div><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.location}</p><span style={{ ...s.badge, background: race.pickType === 'Constructor' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(74, 222, 128, 0.2)', color: race.pickType === 'Constructor' ? '#c084fc' : '#4ade80' }}>{race.pickType === 'Constructor' ? 'Constructor' : 'Driver'}</span>{pick && <p style={{ color: '#4ade80', fontSize: '13px', marginTop: '6px' }}>✓ {pick.picks && pick.picks.drivers ? pick.picks.drivers.map(id => { const d = drivers2026.find(x => x.Driver.driverId === id); return d ? d.Driver.familyName : id; }).join(', ') : (pick.picks && pick.picks.constructor)}</p>}</div>{!pick && !locked && <button onClick={() => setSelectedRace(race)} style={{ ...s.btn, ...s.btnRed, padding: '8px 16px' }}>Pick</button>}{!pick && locked && <span style={{ color: '#64748b', fontSize: '13px' }}>Picks closed</span>}</div>; })}</div> : <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '20px' }}><h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0' }}>{selectedRace.name}</h3><p style={{ color: '#94a3b8', margin: '0 0 20px 0' }}>{selectedRace.pickType === 'Constructor' ? 'Pick 1 Constructor' : 'Pick 1 Driver'}</p>{selectedRace.pickType === 'Constructor' ? <div><p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOT6 (2x)</p><div style={s.grid}>{constructors2026.map(c => { const picked = isConstructorPicked(c.Constructor.name); const selected = selectedConstructor === c.Constructor.name; const teamColor = getTeamColor(c.Constructor.name); return <button key={c.Constructor.constructorId} onClick={() => { if (picked) return; setSelectedConstructor(c.Constructor.name); }} disabled={picked} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : `2px solid ${teamColor}`, background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : `${teamColor}22`, color: picked ? '#64748b' : 'white', position: 'relative' }}><div style={{ fontWeight: '700', color: selected ? 'white' : teamColor }}>{c.Constructor.name}</div><div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}><span style={{ fontSize: '11px', background: teamColor, padding: '2px 6px', borderRadius: '4px', color: '#fff' }}>#{c.position}</span>{isOOT6(c.Constructor.name) && <span style={{ fontSize: '11px', background: '#7c3aed', padding: '2px 6px', borderRadius: '4px' }}>2x</span>}</div>{picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}</button>; })}</div></div> : <div><p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOTT (2x)</p><div style={s.grid}>{drivers2026.map(d => { const id = d.Driver.driverId; const name = d.Driver.givenName + ' ' + d.Driver.familyName; const picked = isDriverPicked(id); const selected = selectedDrivers.includes(id); const max = 1; const teamColor = getTeamColor(d.Constructors[0].name); return <button key={id} onClick={() => { if (picked) return; if (selected) setSelectedDrivers(selectedDrivers.filter(x => x !== id)); else if (selectedDrivers.length < max) setSelectedDrivers([...selectedDrivers, id]); }} disabled={picked || (!selected && selectedDrivers.length >= max)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : `2px solid ${teamColor}`, background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : `${teamColor}22`, color: picked ? '#64748b' : 'white', position: 'relative' }}><div style={{ fontWeight: '600' }}>{name} {isOOTT(name) && '⭐'}</div><div style={{ fontSize: '13px', color: selected ? '#fecaca' : teamColor, marginTop: '4px', fontWeight: '600' }}>{d.Constructors[0].name}</div>{picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}{selected && <div style={{ position: 'absolute', top: '8px', right: '8px', width: '22px', height: '22px', background: 'white', color: '#dc2626', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '11px' }}>✓</div>}</button>; })}</div></div>}<div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}><button onClick={savePick} disabled={(selectedRace.pickType === 'Constructor' && !selectedConstructor) || (selectedRace.pickType !== 'Constructor' && selectedDrivers.length === 0)} style={{ ...s.btn, ...s.btnGreen, opacity: ((selectedRace.pickType === 'Constructor' && !selectedConstructor) || (selectedRace.pickType !== 'Constructor' && selectedDrivers.length === 0)) ? 0.5 : 1 }}>Confirm</button><button onClick={() => { setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor(''); }} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div></div>}</div>}
+        {activeTab === 'picks' && <div><div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📋 My Picks</h2>{!selectedRace ? <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => { const pick = getUserPick(race.id); const locked = isRaceLocked(race.id); const countdown = getCountdown(race.id); return <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', border: pick ? '1px solid rgba(74, 222, 128, 0.3)' : locked ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)' }}><div><div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}><span style={{ fontSize: '11px', fontWeight: '700', background: '#475569', padding: '3px 7px', borderRadius: '4px' }}>R{i + 1}</span><span style={{ fontWeight: '700' }}>{race.name}</span>{locked && <span style={{ fontSize: '11px', background: 'rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '3px 7px', borderRadius: '4px' }}>🔒 Locked</span>}{!locked && countdown && <span style={{ fontSize: '11px', background: 'rgba(251, 191, 36, 0.3)', color: '#fbbf24', padding: '3px 7px', borderRadius: '4px' }}>⏱️ {countdown}</span>}</div><p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0' }}>{race.date} • {race.location}</p><span style={{ ...s.badge, background: race.pickType === 'Constructor' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(74, 222, 128, 0.2)', color: race.pickType === 'Constructor' ? '#c084fc' : '#4ade80' }}>{race.pickType === 'Constructor' ? 'Constructor' : 'Driver'}</span>{pick && <p style={{ color: '#4ade80', fontSize: '13px', marginTop: '6px' }}>✓ {pick.picks && pick.picks.drivers ? pick.picks.drivers.map(id => { const d = drivers2026.find(x => x.Driver.driverId === id); return d ? d.Driver.familyName : id; }).join(', ') : (pick.picks && pick.picks.constructor)}</p>}</div>{!pick && !locked && <button onClick={() => setSelectedRace(race)} style={{ ...s.btn, ...s.btnRed, padding: '8px 16px' }}>Pick</button>}{pick && !locked && <button onClick={() => setSelectedRace(race)} style={{ ...s.btn, ...s.btnBlue, padding: '8px 16px' }}>✏️ Edit</button>}{!pick && locked && <span style={{ color: '#64748b', fontSize: '13px' }}>Picks closed</span>}</div>; })}</div> : <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '16px', padding: '20px' }}><h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0' }}>{selectedRace.name}</h3><p style={{ color: '#94a3b8', margin: '0 0 20px 0' }}>{selectedRace.pickType === 'Constructor' ? 'Pick 1 Constructor' : 'Pick 1 Driver'}</p>{selectedRace.pickType === 'Constructor' ? <div><p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOT6 (2x)</p><div style={s.grid}>{constructors2026.map(c => { const picked = isConstructorPicked(c.Constructor.name); const selected = selectedConstructor === c.Constructor.name; const teamColor = getTeamColor(c.Constructor.name); return <button key={c.Constructor.constructorId} onClick={() => { if (picked) return; setSelectedConstructor(c.Constructor.name); }} disabled={picked} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : `2px solid ${teamColor}`, background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : `${teamColor}22`, color: picked ? '#64748b' : 'white', position: 'relative' }}><div style={{ fontWeight: '700', color: selected ? 'white' : teamColor }}>{c.Constructor.name}</div><div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}><span style={{ fontSize: '11px', background: teamColor, padding: '2px 6px', borderRadius: '4px', color: '#fff' }}>#{c.position}</span>{isOOT6(c.Constructor.name) && <span style={{ fontSize: '11px', background: '#7c3aed', padding: '2px 6px', borderRadius: '4px' }}>2x</span>}</div>{picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}</button>; })}</div></div> : <div><p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '12px' }}>🟢 Available | ⚫ Used | ⭐ OOTT (2x)</p><div style={s.grid}>{drivers2026.map(d => { const id = d.Driver.driverId; const name = d.Driver.givenName + ' ' + d.Driver.familyName; const picked = isDriverPicked(id); const selected = selectedDrivers.includes(id); const max = 1; const teamColor = getTeamColor(d.Constructors[0].name); return <button key={id} onClick={() => { if (picked) return; if (selected) setSelectedDrivers(selectedDrivers.filter(x => x !== id)); else if (selectedDrivers.length < max) setSelectedDrivers([...selectedDrivers, id]); }} disabled={picked || (!selected && selectedDrivers.length >= max)} style={{ padding: '14px', borderRadius: '12px', textAlign: 'left', cursor: picked ? 'not-allowed' : 'pointer', border: selected ? '2px solid #dc2626' : `2px solid ${teamColor}`, background: picked ? 'rgba(30, 41, 59, 0.5)' : selected ? '#dc2626' : `${teamColor}22`, color: picked ? '#64748b' : 'white', position: 'relative' }}><div style={{ fontWeight: '600' }}>{name} {isOOTT(name) && '⭐'}</div><div style={{ fontSize: '13px', color: selected ? '#fecaca' : teamColor, marginTop: '4px', fontWeight: '600' }}>{d.Constructors[0].name}</div>{picked && <div style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '11px', background: '#475569', padding: '4px 10px', borderRadius: '999px' }}>Used</span></div>}{selected && <div style={{ position: 'absolute', top: '8px', right: '8px', width: '22px', height: '22px', background: 'white', color: '#dc2626', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '11px' }}>✓</div>}</button>; })}</div></div>}<div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}><button onClick={savePick} disabled={(selectedRace.pickType === 'Constructor' && !selectedConstructor) || (selectedRace.pickType !== 'Constructor' && selectedDrivers.length === 0)} style={{ ...s.btn, ...s.btnGreen, opacity: ((selectedRace.pickType === 'Constructor' && !selectedConstructor) || (selectedRace.pickType !== 'Constructor' && selectedDrivers.length === 0)) ? 0.5 : 1 }}>{getUserPick(selectedRace.id) ? 'Update' : 'Confirm'}</button><button onClick={() => { setSelectedRace(null); setSelectedDrivers([]); setSelectedConstructor(''); }} style={{ ...s.btn, ...s.btnGray }}>Cancel</button></div></div>}</div>
+        {!selectedRace && raceSchedule.filter(r => isRaceLocked(r.id) && !raceResults[r.id]).length > 0 && <div style={{ ...s.card, marginTop: '16px', background: 'rgba(251, 191, 36, 0.05)', border: '1px solid rgba(251, 191, 36, 0.2)' }}><h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#fbbf24' }}>🔒 This Week's Pool Picks</h3>{raceSchedule.filter(r => isRaceLocked(r.id) && !raceResults[r.id]).map((race, i) => <div key={race.id} style={{ marginBottom: i < raceSchedule.filter(r => isRaceLocked(r.id) && !raceResults[r.id]).length - 1 ? '16px' : 0 }}><div style={{ fontWeight: '600', marginBottom: '8px' }}>{race.name}</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>{users.map(user => { const pick = userPicks[user.id + '-' + race.id]; if (!pick || !pick.picks) return <span key={user.id} style={{ background: 'rgba(239, 68, 68, 0.2)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', color: '#f87171' }}>{user.nickname}: No pick</span>; let pickName = ''; if (pick.picks.drivers && pick.picks.drivers[0]) { const driver = drivers2026.find(d => d.Driver.driverId === pick.picks.drivers[0]); pickName = driver ? driver.Driver.familyName : pick.picks.drivers[0]; } if (pick.picks.constructor) { pickName = pick.picks.constructor; } return <span key={user.id} style={{ background: 'rgba(71, 85, 105, 0.4)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px' }}>{user.nickname}: {pickName}</span>; })}</div></div>)}</div>}</div>}
         {activeTab === 'schedule' && <div style={s.card}><h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📅 2026 Calendar</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{raceSchedule.map((race, i) => <div key={race.id} style={{ background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}><span style={{ fontSize: '20px', fontWeight: '800', color: '#475569', width: '36px' }}>{i + 1}</span><div><span style={{ fontWeight: '700' }}>{race.name}</span>{race.sprint && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(168, 85, 247, 0.3)', color: '#c084fc', padding: '2px 8px', borderRadius: '4px' }}>⚡ Sprint</span>}<p style={{ color: '#94a3b8', fontSize: '13px', margin: '2px 0 0 0' }}>{race.location} • {race.date}</p></div></div><span style={{ ...s.badge, background: race.pickType === 'Constructor' ? '#7c3aed' : '#16a34a' }}>{race.pickType === 'Constructor' ? 'Constructor' : 'Driver'}</span></div>)}</div></div>}
 
         {activeTab === 'history' && <div style={s.card}>
-          <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📜 Race History & Results</h2>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>📜 Race History & Picks</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {raceSchedule.map((race, i) => {
               const result = raceResults[race.id];
               const hasResult = result && result.driverPositions;
+              const locked = isRaceLocked(race.id);
               
               // Calculate race winner (highest finishing position among all poolies)
               let raceWinners = [];
@@ -758,42 +808,44 @@ function App() {
               }
               
               return (
-                <div key={race.id} style={{ background: hasResult ? 'rgba(74, 222, 128, 0.05)' : 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px', border: hasResult ? '1px solid rgba(74, 222, 128, 0.2)' : '1px solid rgba(100, 116, 139, 0.2)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: hasResult ? '12px' : 0 }}>
+                <div key={race.id} style={{ background: hasResult ? 'rgba(74, 222, 128, 0.05)' : locked ? 'rgba(251, 191, 36, 0.05)' : 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px', border: hasResult ? '1px solid rgba(74, 222, 128, 0.2)' : locked ? '1px solid rgba(251, 191, 36, 0.2)' : '1px solid rgba(100, 116, 139, 0.2)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: (hasResult || locked) ? '12px' : 0 }}>
                     <div>
                       <span style={{ fontWeight: '700' }}>R{i + 1}: {race.name}</span>
                       {race.sprint && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(168, 85, 247, 0.3)', color: '#c084fc', padding: '2px 8px', borderRadius: '4px' }}>⚡ Sprint</span>}
                     </div>
-                    {hasResult ? <span style={{ color: '#4ade80', fontSize: '13px' }}>✓ Complete</span> : <span style={{ color: '#64748b', fontSize: '13px' }}>Upcoming</span>}
+                    {hasResult ? <span style={{ color: '#4ade80', fontSize: '13px' }}>✓ Complete</span> : locked ? <span style={{ color: '#fbbf24', fontSize: '13px' }}>🔒 Locked</span> : <span style={{ color: '#64748b', fontSize: '13px' }}>Upcoming</span>}
                   </div>
                   {hasResult && (
-                    <div>
-                      <div style={{ marginBottom: '8px' }}>
-                        <span style={{ color: '#fbbf24', fontSize: '14px', fontWeight: '600' }}>🏆 Weekly Winner: </span>
-                        <span style={{ color: '#fbbf24' }}>{raceWinners.length > 0 ? raceWinners.join(', ') : 'No picks'}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {users.map(user => {
-                          const pick = userPicks[user.id + '-' + race.id];
-                          if (!pick || !pick.picks) return null;
-                          let pickName = '';
-                          let pos = '';
-                          if (pick.picks.drivers && pick.picks.drivers[0]) {
-                            const driver = drivers2026.find(d => d.Driver.driverId === pick.picks.drivers[0]);
-                            pickName = driver ? driver.Driver.familyName : pick.picks.drivers[0];
+                    <div style={{ marginBottom: '8px' }}>
+                      <span style={{ color: '#fbbf24', fontSize: '14px', fontWeight: '600' }}>🏆 Weekly Winner: </span>
+                      <span style={{ color: '#fbbf24' }}>{raceWinners.length > 0 ? raceWinners.join(', ') : 'No picks'}</span>
+                    </div>
+                  )}
+                  {(hasResult || locked) && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {users.map(user => {
+                        const pick = userPicks[user.id + '-' + race.id];
+                        if (!pick || !pick.picks) return <span key={user.id} style={{ background: 'rgba(239, 68, 68, 0.2)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', color: '#f87171' }}>{user.nickname}: No pick</span>;
+                        let pickName = '';
+                        let pos = '';
+                        if (pick.picks.drivers && pick.picks.drivers[0]) {
+                          const driver = drivers2026.find(d => d.Driver.driverId === pick.picks.drivers[0]);
+                          pickName = driver ? driver.Driver.familyName : pick.picks.drivers[0];
+                          if (hasResult) {
                             const driverResult = result.driverPositions[pick.picks.drivers[0]];
-                            pos = driverResult && driverResult.position > 0 ? 'P' + driverResult.position : '';
+                            pos = driverResult && driverResult.position > 0 ? 'P' + driverResult.position : 'DNF';
                           }
-                          if (pick.picks.constructor) {
-                            pickName = pick.picks.constructor;
-                          }
-                          return (
-                            <span key={user.id} style={{ background: 'rgba(71, 85, 105, 0.4)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px' }}>
-                              {user.nickname}: {pickName} {pos && <span style={{ color: '#4ade80' }}>{pos}</span>}
-                            </span>
-                          );
-                        })}
-                      </div>
+                        }
+                        if (pick.picks.constructor) {
+                          pickName = pick.picks.constructor;
+                        }
+                        return (
+                          <span key={user.id} style={{ background: 'rgba(71, 85, 105, 0.4)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px' }}>
+                            {user.nickname}: {pickName} {pos && <span style={{ color: '#4ade80' }}>{pos}</span>}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -894,28 +946,15 @@ function App() {
         </div>}
 
         {activeTab === 'economics' && <div style={s.card}>
-          <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>💰 Economics Dashboard</h2>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 20px 0' }}>💰 Pool Economics</h2>
           
           {(() => {
             const payingUsers = users.filter(u => !u.justForFun);
             const numPoolies = payingUsers.length;
-            const entryFeePool = numPoolies * 250;
             const weeklyPool = numPoolies * 10;
-            const sprintPool = numPoolies * 10;
             const totalPool = numPoolies * 550;
             
-            const seasonPayouts = [
-              { place: 1, pct: 0.45, label: '🥇 P1' },
-              { place: 2, pct: 0.20, label: '🥈 P2' },
-              { place: 3, pct: 0.15, label: '🥉 P3' },
-              { place: 4, pct: 0.10, label: 'P4' },
-              { place: 5, pct: 0.05, label: 'P5' }
-            ];
-            
-            const sortedPayingUsers = [...payingUsers].sort((a, b) => (b.points || 0) - (a.points || 0));
-            
-            const getRaceWinners = (raceId, isSprint = false) => {
-              const race = raceSchedule.find(r => r.id === raceId);
+            const getRaceWinners = (raceId) => {
               const result = raceResults[raceId];
               if (!result || !result.driverPositions) return [];
               
@@ -959,16 +998,9 @@ function App() {
             };
             
             const userEarnings = {};
-            payingUsers.forEach(u => { userEarnings[u.id] = { season: 0, weekly: 0, sprint: 0, total: 0 }; });
-            
-            sortedPayingUsers.forEach((user, idx) => {
-              if (idx < 5 && seasonPayouts[idx]) {
-                userEarnings[user.id].season = Math.round(entryFeePool * seasonPayouts[idx].pct);
-              }
-            });
+            payingUsers.forEach(u => { userEarnings[u.id] = { weekly: 0, balance: -550 }; });
             
             const raceWinnersList = [];
-            const sprintWinnersList = [];
             
             raceSchedule.forEach(race => {
               const result = raceResults[race.id];
@@ -976,27 +1008,20 @@ function App() {
                 const winners = getRaceWinners(race.id);
                 if (winners.length > 0) {
                   const prize = Math.round(weeklyPool / winners.length);
-                  winners.forEach(w => { userEarnings[w.user.id].weekly += prize; });
+                  winners.forEach(w => { 
+                    userEarnings[w.user.id].weekly += prize;
+                    userEarnings[w.user.id].balance += prize;
+                  });
                   raceWinnersList.push({ race, winners, prize });
-                }
-                
-                if (race.sprint) {
-                  const sprintWinners = getRaceWinners(race.id, true);
-                  if (sprintWinners.length > 0) {
-                    const sprintPrize = Math.round(sprintPool / sprintWinners.length);
-                    sprintWinners.forEach(w => { userEarnings[w.user.id].sprint += sprintPrize; });
-                    sprintWinnersList.push({ race, winners: sprintWinners, prize: sprintPrize });
-                  }
                 }
               }
             });
             
-            payingUsers.forEach(u => {
-              userEarnings[u.id].total = userEarnings[u.id].season + userEarnings[u.id].weekly + userEarnings[u.id].sprint - 550;
-            });
+            // Sort by balance (lowest/most owed first)
+            const sortedByBalance = [...payingUsers].sort((a, b) => userEarnings[a.id].balance - userEarnings[b.id].balance);
             
             return (<div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '24px' }}>
                 <div style={{ background: 'rgba(251, 191, 36, 0.15)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
                   <div style={{ fontSize: '14px', color: '#94a3b8' }}>Poolies</div>
                   <div style={{ fontSize: '32px', fontWeight: '700', color: '#fbbf24' }}>{numPoolies}</div>
@@ -1006,81 +1031,48 @@ function App() {
                   <div style={{ fontSize: '32px', fontWeight: '700', color: '#4ade80' }}>${totalPool.toLocaleString()}</div>
                 </div>
                 <div style={{ background: 'rgba(96, 165, 250, 0.15)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '14px', color: '#94a3b8' }}>Entry Fee Pool</div>
-                  <div style={{ fontSize: '32px', fontWeight: '700', color: '#60a5fa' }}>${entryFeePool.toLocaleString()}</div>
+                  <div style={{ fontSize: '14px', color: '#94a3b8' }}>Weekly Pot</div>
+                  <div style={{ fontSize: '32px', fontWeight: '700', color: '#60a5fa' }}>${weeklyPool}/race</div>
                 </div>
               </div>
 
-              <div style={{ background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#fbbf24' }}>🏆 Season Standings Payouts</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {seasonPayouts.map((p, idx) => {
-                    const user = sortedPayingUsers[idx];
-                    const payout = Math.round(entryFeePool * p.pct);
-                    return <div key={p.place} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '12px' }}>
-                      <div><span style={{ fontWeight: '700', marginRight: '12px' }}>{p.label}</span><span style={{ color: user ? '#fff' : '#64748b' }}>{user ? user.nickname : 'TBD'}</span>{user && <span style={{ color: '#94a3b8', marginLeft: '8px' }}>({user.points || 0} pts)</span>}</div>
-                      <div style={{ fontWeight: '700', color: '#4ade80' }}>${payout.toLocaleString()}</div>
-                    </div>;
-                  })}
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#4ade80' }}>🏁 Weekly Race Winners (${weeklyPool}/race)</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
-                  {raceSchedule.map(race => {
-                    const raceWinner = raceWinnersList.find(r => r.race.id === race.id);
-                    const hasResult = raceResults[race.id];
-                    return <div key={race.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px 12px', fontSize: '14px' }}>
-                      <div><span style={{ color: '#94a3b8', marginRight: '8px' }}>R{race.id}</span><span>{race.name}</span></div>
-                      {raceWinner ? <div style={{ color: '#4ade80' }}>{raceWinner.winners.map(w => w.user.nickname).join(', ')} (P{raceWinner.winners[0].pos}) - ${raceWinner.prize}</div> : <span style={{ color: '#64748b' }}>{hasResult ? 'No winner' : 'Pending'}</span>}
-                    </div>;
-                  })}
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#c084fc' }}>⚡ Sprint Race Winners (${sprintPool}/sprint)</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {raceSchedule.filter(r => r.sprint).map(race => {
-                    const sprintWinner = sprintWinnersList.find(r => r.race.id === race.id);
-                    const hasResult = raceResults[race.id];
-                    return <div key={race.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px 12px', fontSize: '14px' }}>
-                      <div><span style={{ color: '#94a3b8', marginRight: '8px' }}>R{race.id}</span><span>{race.name}</span></div>
-                      {sprintWinner ? <div style={{ color: '#c084fc' }}>{sprintWinner.winners.map(w => w.user.nickname).join(', ')} (P{sprintWinner.winners[0].pos}) - ${sprintWinner.prize}</div> : <span style={{ color: '#64748b' }}>{hasResult ? 'No winner' : 'Pending'}</span>}
-                    </div>;
-                  })}
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '12px', padding: '20px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0' }}>📊 Season Balance Summary</h3>
+              <div style={{ background: 'rgba(51, 65, 85, 0.4)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0' }}>📊 Balance Sheet</h3>
+                <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>Everyone starts at -$550. Win weekly races to climb out of the hole!</p>
                 <div style={{ overflowX: 'auto' }}>
                   <table style={s.table}>
                     <thead>
                       <tr>
                         <th style={s.th}>Poolie</th>
-                        <th style={s.th}>Season</th>
-                        <th style={s.th}>Weekly</th>
-                        <th style={s.th}>Sprint</th>
-                        <th style={s.th}>Investment</th>
+                        <th style={s.th}>Weekly Wins</th>
                         <th style={s.th}>Balance</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedPayingUsers.map(user => {
+                      {sortedByBalance.map(user => {
                         const e = userEarnings[user.id];
-                        return <tr key={user.id}>
-                          <td style={s.td}><strong>{user.nickname}</strong></td>
-                          <td style={s.td}>${e.season.toLocaleString()}</td>
+                        return <tr key={user.id} style={{ background: currentUser && user.id === currentUser.id ? 'rgba(220, 38, 38, 0.1)' : 'transparent' }}>
+                          <td style={s.td}><strong>{user.nickname}</strong>{currentUser && user.id === currentUser.id && <span style={{ marginLeft: '8px', fontSize: '11px', background: 'rgba(220, 38, 38, 0.3)', color: '#fca5a5', padding: '2px 6px', borderRadius: '999px' }}>You</span>}</td>
                           <td style={s.td}>${e.weekly.toLocaleString()}</td>
-                          <td style={s.td}>${e.sprint.toLocaleString()}</td>
-                          <td style={s.td}>-$550</td>
-                          <td style={{ ...s.td, fontWeight: '700', color: e.total >= 0 ? '#4ade80' : '#f87171' }}>{e.total >= 0 ? '+' : ''}${e.total.toLocaleString()}</td>
+                          <td style={{ ...s.td, fontWeight: '700', color: e.balance >= 0 ? '#4ade80' : '#f87171' }}>{e.balance >= 0 ? '+' : ''}${e.balance.toLocaleString()}</td>
                         </tr>;
                       })}
                     </tbody>
                   </table>
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: '12px', padding: '20px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px 0', color: '#4ade80' }}>🏁 Weekly Race Winners (${weeklyPool}/race)</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
+                  {raceSchedule.map(race => {
+                    const raceWinner = raceWinnersList.find(r => r.race.id === race.id);
+                    const hasResult = raceResults[race.id];
+                    return <div key={race.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(71, 85, 105, 0.3)', borderRadius: '8px', padding: '10px 12px', fontSize: '14px' }}>
+                      <div><span style={{ color: '#94a3b8', marginRight: '8px' }}>R{race.id}</span><span>{race.name}</span>{race.sprint && <span style={{ marginLeft: '6px', fontSize: '10px', background: 'rgba(168, 85, 247, 0.3)', color: '#c084fc', padding: '2px 6px', borderRadius: '4px' }}>⚡</span>}</div>
+                      {raceWinner ? <div style={{ color: '#4ade80' }}>{raceWinner.winners.map(w => w.user.nickname).join(', ')} (P{raceWinner.winners[0].pos}) - ${raceWinner.prize}</div> : <span style={{ color: '#64748b' }}>{hasResult ? 'No winner' : 'Pending'}</span>}
+                    </div>;
+                  })}
                 </div>
               </div>
             </div>);
