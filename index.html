@@ -316,12 +316,15 @@ function App() {
   const getDriverSeasonPoints = (driverId) => {
     const pointsTable = { 1: 27, 2: 21, 3: 20, 4: 19, 5: 18, 6: 17, 7: 16, 8: 15, 9: 14, 10: 13, 11: 12, 12: 11, 13: 10, 14: 9, 15: 8, 16: 7, 17: 6, 18: 5, 19: 4, 20: 3, 21: 2, 22: 1 };
     let total = 0;
+    const driver = drivers2026.find(d => d.Driver.driverId === driverId);
+    const driverName = driver ? driver.Driver.givenName + ' ' + driver.Driver.familyName : '';
+    const multiplier = isOOTT(driverName) ? 2 : 1;
     
     Object.entries(raceResults).forEach(([raceId, result]) => {
       if (result && result.driverPositions && result.driverPositions[driverId]) {
         const position = result.driverPositions[driverId].position;
         if (position > 0 && position <= 22) {
-          total += pointsTable[position] || 0;
+          total += (pointsTable[position] || 0) * multiplier;
         }
       }
     });
@@ -1437,17 +1440,13 @@ function App() {
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span style={{ fontWeight: '700' }}>{name}</span>
-                          <span style={{ background: teamColor, color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '700' }}>#{d.Driver.driverId}</span>
+                          <span style={{ fontWeight: '800', fontSize: '16px', color: d.seasonPoints > 0 ? '#4ade80' : '#64748b' }}>{d.seasonPoints} pts</span>
                           {isOOTT(name) && <span>⭐</span>}
                         </div>
                         <p style={{ fontSize: '13px', margin: '2px 0 0 0', color: teamColor, fontWeight: '600' }}>{d.Constructors[0].name}</p>
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ textAlign: 'right', marginRight: '8px' }}>
-                        <div style={{ fontWeight: '800', fontSize: '18px', color: d.seasonPoints > 0 ? '#4ade80' : '#64748b' }}>{d.seasonPoints}</div>
-                        <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>pts</div>
-                      </div>
                       {isPicked && <span style={{ background: '#16a34a', color: '#fff', padding: '6px 14px', borderRadius: '8px', fontSize: '14px', fontWeight: '700' }}>PICKED</span>}
                       {isOOTT(name) && <span style={{ ...s.badge, background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>OOTT 2x</span>}
                       <span style={{ fontSize: '12px', color: '#94a3b8' }}>{availablePoolies.length}/{users.length} avail</span>
