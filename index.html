@@ -476,48 +476,62 @@ function App() {
     if (!currentUser) return [];
     const pointsTable = { 1: 27, 2: 21, 3: 20, 4: 19, 5: 18, 6: 17, 7: 16, 8: 15, 9: 14, 10: 13, 11: 12, 12: 11, 13: 10, 14: 9, 15: 8, 16: 7, 17: 6, 18: 5, 19: 4, 20: 3, 21: 2, 22: 1 };
     const breakdown = [];
-    Object.entries(userPicks).forEach(([key, pick]) => {
-      if (!key.startsWith(currentUser.id + '-')) return;
-      const raceId = key.split('-')[1];
-      const race = raceSchedule.find(r => r.id.toString() === raceId);
-      const result = raceResults[raceId];
-      if (!race) return;
-      let raceBreakdown = { race: race.name, raceId: race.id, pick: null, position: null, basePoints: 0, multiplier: 1, totalPoints: 0, hasResult: !!result };
-      if (pick.picks && pick.picks.drivers && pick.picks.drivers[0]) {
+    
+    raceSchedule.filter(r => !r.cancelled).forEach(race => {
+      const pick = userPicks[currentUser.id + '-' + race.id];
+      const result = raceResults[race.id];
+      const hasResult = result && result.driverPositions;
+      
+      if (!pick || !pick.picks) return; // No pick for this race
+      
+      let row = { race: race.name, raceId: race.id, pick: '', position: '-', points: 0, hasResult };
+      
+      // Driver pick
+      if (pick.picks.drivers && pick.picks.drivers[0]) {
         const driverId = pick.picks.drivers[0];
         const driver = drivers2026.find(d => d.Driver.driverId === driverId);
         const driverName = driver ? driver.Driver.givenName + ' ' + driver.Driver.familyName : driverId;
-        raceBreakdown.pick = driverName;
-        if (result && result.driverPositions && result.driverPositions[driverId]) {
+        row.pick = driverName;
+        
+        if (hasResult && result.driverPositions[driverId]) {
           const pos = result.driverPositions[driverId].position;
-          raceBreakdown.position = pos > 0 ? 'P' + pos : 'DNF';
-          raceBreakdown.basePoints = pos > 0 ? (pointsTable[pos] || 0) : 0;
-          raceBreakdown.multiplier = isOOTT(driverName) ? 2 : 1;
-          raceBreakdown.totalPoints = raceBreakdown.basePoints * raceBreakdown.multiplier;
+          if (pos > 0) {
+            const basePoints = pointsTable[pos] || 0;
+            const multiplier = isOOTT(driverName) ? 2 : 1;
+            row.position = 'P' + pos;
+            row.points = basePoints * multiplier;
+            if (multiplier === 2) row.pick += ' ⭐';
+          } else {
+            row.position = 'DNF';
+          }
         }
       }
-      if (pick.picks && pick.picks.constructor) {
+      // Constructor pick
+      else if (pick.picks.constructor) {
         const constructorName = pick.picks.constructor;
-        raceBreakdown.pick = constructorName;
-        if (result && result.driverPositions) {
+        row.pick = constructorName;
+        
+        if (hasResult) {
           const teamDrivers = drivers2026.filter(d => d.Constructors[0].name === constructorName);
-          let pts = 0;
+          let totalPts = 0;
           let positions = [];
           teamDrivers.forEach(d => {
             const driverResult = result.driverPositions[d.Driver.driverId];
             if (driverResult && driverResult.position > 0) {
-              pts += pointsTable[driverResult.position] || 0;
+              totalPts += pointsTable[driverResult.position] || 0;
               positions.push('P' + driverResult.position);
             }
           });
-          raceBreakdown.position = positions.join(' + ');
-          raceBreakdown.basePoints = pts;
-          raceBreakdown.multiplier = isOOT6(constructorName) ? 1 : 0.5;
-          raceBreakdown.totalPoints = Math.round(pts * raceBreakdown.multiplier);
+          row.position = positions.join(' + ') || 'DNF';
+          const multiplier = isOOT6(constructorName) ? 1 : 0.5;
+          row.points = Math.round(totalPts * multiplier);
+          if (isOOT6(constructorName)) row.pick += ' ⭐';
         }
       }
-      breakdown.push(raceBreakdown);
+      
+      breakdown.push(row);
     });
+    
     return breakdown.sort((a, b) => a.raceId - b.raceId);
   };
   const exportToCSV = () => {
@@ -840,11 +854,9 @@ function App() {
                   <span style={{ marginLeft: '12px', color: '#94a3b8' }}>{row.pick}</span>
                 </div>
                 {row.hasResult ? (
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ color: '#94a3b8', marginRight: '8px' }}>{row.position}</span>
-                    <span style={{ color: '#94a3b8', marginRight: '8px' }}>{row.basePoints} pts</span>
-                    {row.multiplier !== 1 && <span style={{ color: '#4ade80', marginRight: '8px' }}>×{row.multiplier}</span>}
-                    <span style={{ fontWeight: '700', color: '#4ade80' }}>{row.totalPoints} pts</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ color: '#94a3b8' }}>{row.position}</span>
+                    <span style={{ fontWeight: '700', color: row.points > 0 ? '#4ade80' : '#64748b', minWidth: '50px', textAlign: 'right' }}>{row.points} pts</span>
                   </div>
                 ) : (
                   <span style={{ color: '#64748b' }}>Pending</span>
