@@ -230,6 +230,7 @@ function App() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nickname, setNickname] = useState('');
   const [authError, setAuthError] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [userPicks, setUserPicks] = useState({});
   const [selectedRace, setSelectedRace] = useState(null);
   const [selectedDrivers, setSelectedDrivers] = useState([]);
@@ -342,7 +343,7 @@ function App() {
 
   // Check for saved session on load
   useEffect(() => {
-    const savedSession = localStorage.getItem('f1PoolSession');
+    const savedSession = localStorage.getItem('f1PoolSession') || sessionStorage.getItem('f1PoolSession');
     if (savedSession) {
       try {
         const session = JSON.parse(savedSession);
@@ -353,22 +354,22 @@ function App() {
           // Will be set once users load
           setShowAuth(false);
         }
-      } catch (e) { localStorage.removeItem('f1PoolSession'); }
+      } catch (e) { localStorage.removeItem('f1PoolSession'); sessionStorage.removeItem('f1PoolSession'); }
     }
   }, []);
 
   // Restore user from session after users load
   useEffect(() => {
-    const savedSession = localStorage.getItem('f1PoolSession');
+    const savedSession = localStorage.getItem('f1PoolSession') || sessionStorage.getItem('f1PoolSession');
     if (savedSession && users.length > 0 && !currentUser && !isAdmin) {
       try {
         const session = JSON.parse(savedSession);
         if (session.userId) {
           const user = users.find(u => u.id === session.userId);
           if (user) { setCurrentUser(user); setShowAuth(false); }
-          else { localStorage.removeItem('f1PoolSession'); setShowAuth(true); }
+          else { localStorage.removeItem('f1PoolSession'); sessionStorage.removeItem('f1PoolSession'); setShowAuth(true); }
         }
-      } catch (e) { localStorage.removeItem('f1PoolSession'); }
+      } catch (e) { localStorage.removeItem('f1PoolSession'); sessionStorage.removeItem('f1PoolSession'); }
     }
   }, [users]);
 
@@ -558,9 +559,10 @@ function App() {
   const isOOT6 = (name) => oot6Constructors.includes(name);
 
   const handleLogin = () => {
-    if (email === 'admin' && password === ADMIN_PASSWORD) { setIsAdmin(true); setShowAuth(false); setAuthError(''); setEmail(''); setPassword(''); localStorage.setItem('f1PoolSession', JSON.stringify({ isAdmin: true })); return; }
+    const storage = rememberMe ? localStorage : sessionStorage;
+    if (email === 'admin' && password === ADMIN_PASSWORD) { setIsAdmin(true); setShowAuth(false); setAuthError(''); setEmail(''); setPassword(''); storage.setItem('f1PoolSession', JSON.stringify({ isAdmin: true })); return; }
     const user = users.find(u => u.email === email && u.password === password);
-    if (user) { setCurrentUser(user); setShowAuth(false); setAuthError(''); setEmail(''); setPassword(''); localStorage.setItem('f1PoolSession', JSON.stringify({ userId: user.id })); } else { setAuthError('Invalid email or password'); }
+    if (user) { setCurrentUser(user); setShowAuth(false); setAuthError(''); setEmail(''); setPassword(''); storage.setItem('f1PoolSession', JSON.stringify({ userId: user.id })); } else { setAuthError('Invalid email or password'); }
   };
 
   const handleRegister = () => {
@@ -570,11 +572,13 @@ function App() {
     if (password !== confirmPassword) { setAuthError('Passwords do not match'); return; }
     if (users.find(u => u.email === email)) { setAuthError('Email already registered'); return; }
     const newUser = { id: Date.now().toString(), email, password, nickname, points: 0, picks: 0 };
+    const storage = rememberMe ? localStorage : sessionStorage;
     addUser(newUser); setCurrentUser(newUser); setShowAuth(false); setAuthError('');
     setEmail(''); setPassword(''); setConfirmPassword(''); setNickname('');
+    storage.setItem('f1PoolSession', JSON.stringify({ userId: newUser.id }));
   };
 
-  const handleLogout = () => { setCurrentUser(null); setIsAdmin(false); setShowAuth(true); setActiveTab('standings'); localStorage.removeItem('f1PoolSession'); };
+  const handleLogout = () => { setCurrentUser(null); setIsAdmin(false); setShowAuth(true); setActiveTab('standings'); localStorage.removeItem('f1PoolSession'); sessionStorage.removeItem('f1PoolSession'); };
   const handleChangePassword = () => {
     if (!passwordData.current || !passwordData.new || !passwordData.confirm) { alert('Please fill in all fields'); return; }
     if (passwordData.new !== passwordData.confirm) { alert('New passwords do not match'); return; }
@@ -686,6 +690,10 @@ function App() {
           <input type="text" placeholder={authMode === 'login' ? "Email or 'admin'" : "Email"} value={email} onChange={e => setEmail(e.target.value)} style={s.input} />
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={s.input} />
           {authMode === 'register' && <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={s.input} />}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '8px 0' }}>
+            <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#dc2626', cursor: 'pointer' }} />
+            <span style={{ color: '#cbd5e1', fontSize: '14px' }}>Remember me</span>
+          </label>
           <button onClick={authMode === 'login' ? handleLogin : handleRegister} style={{ ...s.btn, ...s.btnRed, width: '100%', padding: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>{authMode === 'login' ? 'Login' : 'Create Account'}</button>
         </div>
         {authMode === 'login' && <div style={{ marginTop: '24px', textAlign: 'center', background: 'rgba(51, 65, 85, 0.3)', borderRadius: '12px', padding: '16px' }}><p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Enter your credentials to login</p></div>}
